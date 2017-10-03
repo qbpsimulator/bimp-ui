@@ -1,0 +1,505 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.qbp-simulator.com/Schema201212" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:qbp="http://www.qbp-simulator.com/Schema201212">
+    <annotation>
+        <documentation>Defines the schema of simulation related information that is needed to simulate the business process model </documentation></annotation>
+    <complexType name="ProcessSimulationInfoType">
+        <annotation>
+            <documentation>
+                List of all available resources in the simulation that
+                can be assigned to tasks
+            </documentation>
+        </annotation>
+        <sequence>
+            <element name="arrivalRateDistribution"
+                type="qbp:DistributionInfo" minOccurs="1" maxOccurs="1">
+                <annotation>
+                    <documentation>
+                        Distribution of interval between two process
+                        instances in seconds
+                    </documentation>
+                </annotation>
+            </element>
+            <element name="timetables" minOccurs="0" maxOccurs="1">
+                <annotation>
+                    <documentation>
+                        List of all time tables that can be defined for
+                        resources and process arrival rate.
+                    </documentation>
+                </annotation>
+                <complexType>
+                    <sequence maxOccurs="unbounded">
+                        <element name="timetable" type="qbp:TimeTable"
+                            minOccurs="1" maxOccurs="unbounded">
+                        </element>
+                    </sequence>
+                </complexType>
+            </element>
+            <element name="resources" minOccurs="0" maxOccurs="1">
+                <annotation>
+                    <documentation>
+                        List of all resources that can be assigned to
+                        tasks
+                    </documentation>
+                </annotation>
+                <complexType>
+                    <sequence>
+                        <element name="resource" type="qbp:Resource"
+                            minOccurs="1" maxOccurs="unbounded">
+                        </element>
+                    </sequence>
+                </complexType>
+            </element>
+            <element name="elements" minOccurs="0" maxOccurs="1">
+                <annotation>
+                    <documentation>
+                        List of all simulation info objects for all
+                        elements
+                    </documentation>
+                </annotation>
+                <complexType>
+                    <sequence>
+                        <element name="element"
+                            type="qbp:ElementSimulationInfoType" minOccurs="1"
+                            maxOccurs="unbounded">
+                        </element>
+                    </sequence>
+                </complexType>
+            </element>
+            <element name="sequenceFlows" minOccurs="0" maxOccurs="1">
+                <annotation>
+                    <documentation>
+                        List of sequence flow simulation information
+                    </documentation>
+                </annotation>
+                <complexType>
+                    <sequence>
+                        <element name="sequenceFlow"
+                            type="qbp:SequenceFlowSimulationInfoType" minOccurs="1"
+                            maxOccurs="unbounded">
+                        </element>
+                    </sequence>
+                </complexType>
+            </element>
+        </sequence>
+        <attribute name="id" type="string" use="optional">
+            <annotation>
+                <documentation>Unique id</documentation>
+            </annotation>
+        </attribute>
+        <attribute name="processId" type="string" use="optional">
+            <annotation>
+                <documentation>
+                    ID of the process in BPMN file
+                </documentation>
+            </annotation>
+        </attribute>
+        <attribute name="processInstances" use="required">
+            <annotation>
+                <documentation>
+                    Total number of business process instances to run
+                </documentation>
+            </annotation>
+            <simpleType>
+                <restriction base="int">
+                    <minExclusive value="1"></minExclusive>
+                </restriction>
+            </simpleType>
+        </attribute>
+        <attribute name="startDateTime" type="dateTime">
+            <annotation>
+                <documentation>
+                    Date and time for the simulation clock when
+                    simulation has started
+                </documentation>
+            </annotation>
+        </attribute>
+        <attribute name="currency" type="string" use="optional"
+            default="EUR">
+            <annotation>
+                <documentation>
+                    Currency to be used when reporting simulation cost
+                    statistics
+                </documentation>
+            </annotation>
+        </attribute>
+        <attribute name="version" type="int"></attribute>
+    </complexType>
+
+    <complexType name="ElementSimulationInfoType">
+        <annotation>
+            <documentation>
+                Simulation information for elements
+            </documentation>
+        </annotation>
+        <sequence>
+            <element name="durationDistribution"
+                type="qbp:DistributionInfo">
+                <annotation>
+                    <documentation>
+                        Duration of the element in seconds
+                    </documentation>
+                </annotation>
+            </element>
+            <element name="resourceIds">
+                <annotation>
+                    <documentation>
+                        List of resources that can be used to handle the
+                        element. One supported. Required for tasks.
+                    </documentation>
+                </annotation>
+                <complexType>
+                    <sequence>
+                        <element name="resourceId" type="string"
+                            minOccurs="1" maxOccurs="1">
+                            <annotation>
+                                <documentation>
+                                    ID of the resource
+                                </documentation>
+                            </annotation>
+                        </element>
+                    </sequence>
+                </complexType>
+            </element>
+            <element name="durationThresholdTimeUnit" minOccurs="0" maxOccurs="1">
+                <annotation>
+                    <documentation>Does not actually specify time unit - values must be given always in seconds. This is only for user interfaces to store the user selection.</documentation>
+                </annotation>
+                <simpleType>
+                    <restriction base="string">
+                        <enumeration value="seconds"></enumeration>
+                        <enumeration value="minutes"></enumeration>
+                        <enumeration value="hours"></enumeration>
+                        <enumeration value="days"></enumeration>
+                    </restriction>
+                </simpleType>
+            </element>            
+        </sequence>
+        <attribute name="id" type="string" use="optional">
+            <annotation>
+                <documentation>ID of the element, unique</documentation>
+            </annotation>
+        </attribute>
+        <attribute name="elementId" type="string" use="required">
+            <annotation>
+                <documentation>
+                    Element ID from the BPMN file for which this object
+                    is related to.
+                </documentation>
+            </annotation>
+        </attribute>
+        <attribute name="fixedCost" type="double">
+            <annotation>
+                <documentation>
+                    Fixed, one time cost, to run the element
+                </documentation>
+            </annotation>
+        </attribute>
+        <attribute name="costThreshold" type="double" use="optional">
+            <annotation>
+                <documentation>
+                    Cost threshold. Default is 0. Additional statistics
+                    will be calculated for elements whose cost exceeds
+                    the threshold.
+                </documentation>
+            </annotation>
+        </attribute>
+        <attribute name="durationThreshold" type="double"
+            use="optional">
+            <annotation>
+                <documentation>
+                    Duration threshold in seconds. Default is 0.
+                    Additional statistics will be calculated for
+                    elements whose duration exceeds the threshold.
+                </documentation>
+            </annotation>
+        </attribute>
+        <attribute name="simulateAsTask" type="boolean">
+            <annotation>
+                <documentation>If set for sub-processes, then child elements of sub-process will not be simulated. Duration will be determined from the sub-process distribution.</documentation>
+            </annotation></attribute>
+    </complexType>
+
+    <complexType name="Resource">
+        <annotation>
+            <documentation>A resouce that can be assigned to tasks</documentation>
+        </annotation>
+        <attribute name="id" type="ID" use="required">
+            <annotation>
+                <documentation>Unique Id of the resource</documentation>
+            </annotation>
+        </attribute>
+        <attribute name="name" type="string">
+            <annotation>
+                <documentation>Name of the resource</documentation>
+            </annotation>
+        </attribute>
+        <attribute name="totalAmount">
+            <annotation>
+                <documentation>
+                    Total number of available resources of this type
+                </documentation>
+            </annotation>
+            <simpleType>
+                <restriction base="int">
+                    <minInclusive value="0"></minInclusive>
+                </restriction>
+            </simpleType>
+        </attribute>
+        <attribute name="costPerHour" type="double">
+            <annotation>
+                <documentation>Cost per hour for the resource. Used to calculate activity costs depending on duration.</documentation>
+            </annotation></attribute>
+        <attribute name="timetableId" type="string">
+            <annotation>
+                <documentation>Id of the time table that defines workdays and time for the resource</documentation>
+            </annotation></attribute>
+    </complexType>
+
+    <complexType name="DistributionInfo">
+        <annotation>
+            <documentation>
+                Distribution info type is used to define durations of
+                elements following given distributions. All values are
+                in seconds.
+            </documentation>
+        </annotation>
+        <sequence>
+            <element name="histogramDataBins" minOccurs="0"
+                maxOccurs="1">
+                <annotation>
+                    <documentation>
+                        List of histogram bins to define distributions
+                        with probabilities. Used if distribution type is
+                        HISTOGRAM. Sum of probabilities in items must be
+                        equal to 100.
+                    </documentation>
+                </annotation>
+                <complexType>
+                    <sequence>
+                        <element name="histogramData"
+                            type="qbp:DistributionHistogramBin" minOccurs="1"
+                            maxOccurs="unbounded">
+                            <annotation>
+                                <documentation>
+                                    Histogram bin definition
+                                </documentation>
+                            </annotation>
+                        </element>
+                    </sequence>
+                </complexType>
+            </element>
+            <element name="timeUnit" minOccurs="0" maxOccurs="1">
+                <annotation>
+                    <documentation>Does not actually specify time unit - values must be given always in seconds. This is only for user interfaces to store the user selection.</documentation>
+                </annotation>
+                <simpleType>
+                    <restriction base="string">
+                        <enumeration value="seconds"></enumeration>
+                        <enumeration value="minutes"></enumeration>
+                        <enumeration value="hours"></enumeration>
+                        <enumeration value="days"></enumeration>
+                    </restriction>
+                </simpleType>
+            </element>
+        </sequence>
+        <attribute name="type" type="qbp:DistributionType"
+            use="required">
+            <annotation>
+                <documentation>Distribution type</documentation>
+            </annotation>
+        </attribute>
+        <attribute name="mean" type="double" use="optional">
+            <annotation>
+                <documentation>
+                    For fixed, normal, gamma, triangular and lognormal
+                    distributions. Mean, mode, or fixed value
+                </documentation>
+            </annotation>
+        </attribute>
+        <attribute name="arg1" type="double" use="optional">
+            <annotation>
+                <documentation>
+                    For distributions: uniform - minimum value;
+                    exponential - mean, will be used to calculate 1/mean
+                    for exponential distribution; gamma - variance;
+                    triangular - minimum at "a" parameter; lognormal -
+                    variance;
+                </documentation>
+            </annotation>
+        </attribute>
+        <attribute name="arg2" type="double" use="optional">
+            <annotation>
+                <documentation>
+                    For distributions: uniform - maximum value;
+                    triangular - maximum at "b" parameter;
+                </documentation>
+            </annotation>
+        </attribute>
+    </complexType>
+
+    <simpleType name="DistributionType">
+        <annotation>
+            <documentation>
+                Distributions that are supported for durations.
+            </documentation>
+        </annotation>
+        <restriction base="string">
+            <enumeration value="FIXED"></enumeration>
+            <enumeration value="EXPONENTIAL"></enumeration>
+            <enumeration value="GAMMA"></enumeration>
+            <enumeration value="LOGNORMAL"></enumeration>
+            <enumeration value="NORMAL"></enumeration>
+            <enumeration value="TRIANGULAR"></enumeration>
+            <enumeration value="UNIFORM"></enumeration>
+            <enumeration value="HISTOGRAM"></enumeration>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="WeekDay">
+        <annotation>
+            <documentation>Weekdays used to define TimeTableRule</documentation>
+        </annotation>
+        <restriction base="string">
+            <enumeration value="MONDAY"></enumeration>
+            <enumeration value="TUESDAY"></enumeration>
+            <enumeration value="WEDNESDAY"></enumeration>
+            <enumeration value="THURSDAY"></enumeration>
+            <enumeration value="FRIDAY"></enumeration>
+            <enumeration value="SATURDAY"></enumeration>
+            <enumeration value="SUNDAY"></enumeration>
+        </restriction>
+    </simpleType>    
+
+    <complexType name="TimeTable">
+        <annotation>
+            <documentation>
+                Time table is a set of rules to define work or other
+                periods during a week when something happens in the
+                business process. E.g. when resources are working or
+                when new process instances are started.
+            </documentation>
+        </annotation>
+        <sequence>
+            <element name="rules" minOccurs="1" maxOccurs="1">
+                <annotation>
+                    <documentation>List of time table rules</documentation>
+                </annotation>
+                <complexType>
+                    <sequence>
+                        <element name="rule" type="qbp:TimeTableRule"
+                            minOccurs="1" maxOccurs="unbounded">
+                            <annotation>
+                                <documentation>TIme table rule</documentation>
+                            </annotation>
+                        </element>
+                    </sequence>
+                </complexType>
+            </element>
+        </sequence>
+        <attribute name="id" type="ID" use="required">
+            <annotation>
+                <documentation>Unique Id of the time table</documentation>
+            </annotation></attribute>
+        <attribute name="default" type="boolean">
+            <annotation>
+                <documentation>
+                    Set true if the process instance arrival rate uses
+                    this time table
+                </documentation>
+            </annotation>
+        </attribute>
+        <attribute name="name" type="string" use="optional">
+            <annotation>
+                <documentation>Friendly name of the time table</documentation>
+            </annotation></attribute>
+    </complexType>
+
+    <complexType name="TimeTableRule">
+        <annotation>
+            <documentation>A rule in a time table</documentation>
+        </annotation>
+        <attribute name="fromTime" type="time" use="required">
+            <annotation>
+                <documentation>
+                    Begin time of the rule, included
+                </documentation>
+            </annotation>
+        </attribute>
+        <attribute name="toTime" type="time" use="required">
+            <annotation>
+                <documentation>
+                    End time of the rule, excluded
+                </documentation>
+            </annotation>
+        </attribute>
+        <attribute name="fromWeekDay" use="required"
+            type="qbp:WeekDay">
+            <annotation>
+                <documentation>
+                    Day when the rule applies.
+                </documentation>
+            </annotation>
+        </attribute>
+        <attribute name="toWeekDay" type="qbp:WeekDay" use="optional">
+            <annotation>
+                <documentation>Day until this time table rule applies</documentation>
+            </annotation></attribute>
+    </complexType>
+
+
+
+
+    <element name="processSimulationInfo">
+        <annotation>
+            <documentation>Root node that contains simulation information/scenario</documentation>
+        </annotation>
+        <complexType>
+            <complexContent>
+                <extension base="qbp:ProcessSimulationInfoType"></extension>
+            </complexContent>
+        </complexType>
+    </element>
+
+    <complexType name="SequenceFlowSimulationInfoType">     
+        <annotation>
+            <documentation>Sequence flow simulation information</documentation>
+        </annotation>
+        <attribute name="elementId" type="string" use="required">
+            <annotation>
+                <documentation>Id of the sequence flow element in BPMN file</documentation>
+            </annotation></attribute>
+        <attribute name="executionProbability">
+            <annotation>
+                <documentation>Probaility of executing the sequence flow. Used for XOR and OR gateways. Double value from 0 to 1.</documentation>
+            </annotation>
+            <simpleType>
+                <restriction base="double">
+                    <minInclusive value="0"></minInclusive>
+                    <maxInclusive value="1"></maxInclusive>
+                </restriction>
+            </simpleType>
+        </attribute>
+    </complexType>
+
+    <complexType name="DistributionHistogramBin">
+        <annotation>
+            <documentation>
+                Defines a histogram distribution bin for distributions of type HISTOGRAM
+            </documentation>
+        </annotation>
+        <sequence>
+            <element name="distribution" type="qbp:DistributionInfo" minOccurs="1" maxOccurs="1">
+                <annotation>
+                    <documentation>Distribution to be used for this histogram bin</documentation>
+                </annotation></element>
+        </sequence>
+        <attribute name="probability" type="double">
+            <annotation>
+                <documentation>
+                    Probability from 0 to 100 for the distribution from
+                    this histogram bin to be used. Sum of "probability" values of items in parent collection must be equal to 100.
+                </documentation>
+            </annotation>
+        </attribute>
+    </complexType>
+</schema>

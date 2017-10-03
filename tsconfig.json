@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "outDir": "./npm",
+        "sourceMap": true,
+        "noImplicitAny": false, // todo check
+        "module": "commonjs",
+        "target": "es5",
+        "jsx": "react",
+        "lib": ["es6", "dom", "scripthost"],
+        "allowJs": true, // todo check
+        "experimentalDecorators": true
+    },
+    "include": [
+        "./src/**/*",
+        "./xmlns/**/*"
+    ]
+}

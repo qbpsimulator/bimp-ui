@@ -1,0 +1,141 @@
+import * as React from 'react'
+import Dialog from 'react-toolbox/lib/dialog'
+import ProgressBar from 'react-toolbox/lib/progress_bar'
+
+import * as Types from '../../types'
+
+import { Utils } from '../../model-components/Utils'
+
+interface Props {
+    simulation: Types.SimulationType;
+    errorStackApiKey: string;
+    lastModelData: Array<string>;
+}
+
+interface State {
+    active: boolean;
+    errorSent: boolean;
+}
+
+export default class SimulationStatusDialog extends React.PureComponent<Props, State>  {
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            active: false,
+            errorSent: false
+        }
+    }
+
+    componentWillReceiveProps(nextProps: Props) {
+        // show if simulation was started
+        if (!this.state.active && nextProps.simulation && nextProps.simulation.pending)
+            this.setState({...this.state, active: true, errorSent: false});
+        // or if simulation completed, then get rid of dialog
+        else if (this.state.active && !!nextProps.simulation && !!nextProps.simulation.status && nextProps.simulation.status.status == 'COMPLETED')
+            this.setState({...this.state, active: false});
+    }
+
+    handleToggle = () => {
+        if (this.isRunning())
+            return;
+
+        this.setState({active: !this.state.active});
+    }
+
+    handleSendBugReport = () => {
+        if (!this.props.errorStackApiKey)
+            return;
+
+        const simulation = this.props.simulation;
+        const error = !!simulation && !!simulation.status && typeof(simulation.status.error) === 'string' ? simulation.status.error : "Unknown";
+
+        this.props.lastModelData.forEach(modelData => {
+            Utils.ReportErrorStackError(this.props.errorStackApiKey,
+                'simulation',
+                modelData,
+                error)
+            .then(() => {
+                this.setState({...this.state, errorSent: true});
+            })
+            .catch(() => {
+                this.setState({...this.state, errorSent: true});
+            });
+        });
+    }
+
+    isRunning = (): boolean => {
+        const simulation = this.props.simulation;
+        if (!!simulation && simulation.pending)
+            return true;
+
+        const isError = !!simulation.error || !!simulation.status && (typeof(simulation.status.error) === 'string');
+        return !isError && !!simulation && (simulation.pending ||
+            (!!simulation.status && simulation.status.status != 'COMPLETED' && simulation.status.status != 'FAILED'));
+    }
+
+    render() {
+        const simulation = this.props.simulation;
+        if (!simulation)
+            return null;
+
+        const isError = !!simulation.error || !!simulation.status && (typeof(simulation.status.error) === 'string');
+        let actions = [];
+
+        let infoText = '';
+        if (isError && !!this.props.errorStackApiKey) {
+            if (this.state.errorSent) {
+                infoText = 'Error report sent. Thank you!';
+            }
+            else {
+                actions.push({ label: 'Send bug report', onClick: this.handleSendBugReport });
+                infoText = 'If you think you have found a bug, then please click "Send bug report" button below to send your .bpmn file with simulation scenario for investigation. ';
+            }
+        };
+
+        if (!this.isRunning())
+            actions.push({ label: 'Close', onClick: this.handleToggle });
+
+        let detailsText = '';
+        let statusText = 'Simulation ';
+        if (isError) {
+            statusText += 'FAILED. ';
+
+            if (typeof(simulation.error) === 'object' && !!simulation.error) {
+                statusText += 'Error: ' + simulation.error.message;
+                if (simulation.error.message == 'Network Error') {
+                    infoText += 'Please ensure you have a valid access token.';
+                }
+                detailsText = simulation.error.stack;
+            }
+
+            if (!!simulation.status) {
+                if (typeof(simulation.status.error) === 'string' && !!simulation.status.error)
+                    statusText += 'Error: ' + simulation.status.error;
+
+                if (typeof(simulation.status.errorDetails) === 'string' && !!simulation.status.errorDetails)
+                    detailsText = simulation.status.errorDetails;
+            }
+        }
+        else if (this.isRunning()) {
+            statusText += (!!simulation.status ? simulation.status.status : 'RUNNING') + ' ...'
+        }
+
+        return (<div>
+            <Dialog
+                actions={actions}
+                active={this.state.active}
+                onEscKeyDown={this.handleToggle}
+                title='Simulation status'>
+                <p>{statusText}</p>
+                <p>{infoText}</p>
+                <br/>
+                {detailsText && <p>Details:</p>}
+                {detailsText && <p>{detailsText}</p>}
+                {this.isRunning() &&
+                    <ProgressBar type="linear" mode="indeterminate" />}
+            </Dialog>
+        </div>);
+    }
+}

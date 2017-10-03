@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.qbp-simulator.com/ApiSchema201212" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:qbp="http://www.qbp-simulator.com/ApiSchema201212">
+
+    <annotation>
+    	<documentation>API schema of the QBP Simulator Restful service</documentation></annotation>
+    <simpleType name="SimulationStatus">
+        <annotation>
+        	<documentation>Simulation status enum</documentation>
+        </annotation>
+        <restriction base="string">
+            <enumeration value="QUEUED"/>
+            <enumeration value="RUNNING"/>
+            <enumeration value="FAILED"/>
+            <enumeration value="FINALIZING"/>
+            <enumeration value="COMPLETED"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="SimulationError">
+        <annotation>
+        	<documentation>Simulation error string</documentation>
+        </annotation>
+        <restriction base="string">
+            <enumeration value="INVALID_INPUT"/>
+            <enumeration value="SIMULATION_ERROR"/>
+            <enumeration value="IO_ERROR"/>
+        </restriction>
+    </simpleType>
+
+    <complexType name="SimulationStatusType">
+        <annotation>
+        	<documentation>Simulation status type</documentation>
+        </annotation>
+        <sequence>
+            <element name="errorDetails" type="string" minOccurs="0" maxOccurs="1"/>
+        </sequence>
+        <attribute name="status" type="qbp:SimulationStatus"/>
+        <attribute name="error" type="qbp:SimulationError"/>
+        <attribute name="completed" type="int"/>
+        <attribute name="total" type="int"/>
+    </complexType>
+
+    <element name="StartSimulationRequest">
+        <annotation>
+        	<documentation>Request to start a simulation</documentation>
+        </annotation>
+        <complexType>
+            <annotation>
+            	<documentation>Start simulation request type</documentation>
+            </annotation>
+            <sequence>
+                <element name="modelData" type="string" maxOccurs="unbounded" minOccurs="1">
+                	<annotation>
+                		<documentation>BPMN file content that contains embedded simulation information. Define as a XML CDATA string.</documentation>
+                	</annotation></element>
+            </sequence>
+            <attribute name="version" type="float" use="optional" default="1">
+                <annotation>
+                    <documentation>API version</documentation>
+                </annotation>
+            </attribute>
+            <attribute name="generateMXML" type="boolean" use="optional"
+	    		default="false">
+                <annotation>
+                	<documentation>Whether to generate MXML log</documentation>
+                </annotation>
+            </attribute>
+        </complexType>
+    </element>
+
+    <element name="StartSimulationResponse">
+        <annotation>
+        	<documentation>Response for StartSimulationRequest</documentation>
+        </annotation>
+        <complexType>
+            <annotation>
+            	<documentation>Response for start simulation request type</documentation>
+            </annotation>
+            <sequence>
+                <element name="status" type="qbp:SimulationStatusType" minOccurs="1" maxOccurs="1">
+                	<annotation>
+                		<documentation>Simulation status</documentation>
+                	</annotation></element>
+            </sequence>
+            <attribute name="id" type="string">
+            	<annotation>
+            		<documentation>ID of the simulation</documentation>
+            	</annotation></attribute>
+            <attribute name="version" type="float" use="optional" default="1">
+                <annotation>
+                    <documentation>API version</documentation>
+                </annotation>
+            </attribute>
+        </complexType>
+    </element>
+
+    <element name="SimulationStatusResponse">
+        <annotation>
+        	<documentation>Response for SimulationStatus request</documentation>
+        </annotation>
+        <complexType>
+
+            <annotation>
+            	<documentation>Simulation status response type</documentation>
+            </annotation>
+            <sequence>
+                <element name="status" type="qbp:SimulationStatusType"
+    				minOccurs="1" maxOccurs="1">
+                    <annotation>
+                    	<documentation>Simulation status</documentation>
+                    </annotation>
+                </element>
+            </sequence>
+            <attribute name="version" type="float" use="optional" default="1">
+                <annotation>
+                    <documentation>API version</documentation>
+                </annotation>
+            </attribute>
+        </complexType>
+    </element>
+
+    <complexType name="ProcessKPIType">
+        <annotation>
+        	<documentation>Process simulation results/KPIs</documentation>
+        </annotation>
+        <sequence>
+            <element name="minCycleTime" type="double" minOccurs="0"
+   				maxOccurs="1">
+                <annotation>
+                	<documentation>Minimum cycle time of a process instance in seconds</documentation>
+                </annotation>
+            </element>
+            <element name="averageCycleTime" type="double"
+   				minOccurs="0" maxOccurs="1">
+                <annotation>
+                	<documentation>Average cycle time of a process instance in seconds</documentation>
+                </annotation>
+            </element>
+            <element name="maxCycleTime" type="double" minOccurs="0"
+   				maxOccurs="1">
+                <annotation>
+                	<documentation>Maximum cycle time of a process instance in seconds</documentation>
+                </annotation>
+            </element>
+            <element name="totalCycleTime" type="double"
+   				minOccurs="0" maxOccurs="1">
+                <annotation>
+                	<documentation>Summed cycle time of a process instances in seconds</documentation>
+                </annotation>
+            </element>
+            <element name="minCost" type="double" minOccurs="0"
+   				maxOccurs="1">
+                <annotation>
+                	<documentation>Minimum cost of a process instance</documentation>
+                </annotation>
+            </element>
+            <element name="averageCost" type="double" minOccurs="0"
+   				maxOccurs="1">
+                <annotation>
+                	<documentation>Average cost of a process instance</documentation>
+                </annotation>
+            </element>
+            <element name="maxCost" type="double" minOccurs="0"
+   				maxOccurs="1">
+                <annotation>
+                	<documentation>Maximum cost of a process instance</documentation>
+                </annotation>
+            </element>
+            <element name="totalCost" type="double" minOccurs="0"
+   				maxOccurs="1">
+                <annotation>
+                	<documentation>Summed cost of a process instances</documentation>
+                </annotation>
+            </element>
+            <element name="minDuration" type="double" minOccurs="0"
+   				maxOccurs="1">
+                <annotation>
+                	<documentation>Minimum duration of a process instance in seconds</documentation>
+                </annotation>
+            </element>
+            <element name="averageDuration" type="double"
+   				minOccurs="0" maxOccurs="1">
+                <annotation>
+                	<documentation>Average duration of a process instance in seconds</documentation>
+                </annotation>
+            </element>
+            <element name="maxDuration" type="double" minOccurs="0"
+   				maxOccurs="1">
+                <annotation>
+                	<documentation>Maximum duration of a process instance in seconds</documentation>
+                </annotation>
+            </element>
+            <element name="processInstances" type="int" minOccurs="0"
+   				maxOccurs="1">
+                <annotation>
+                	<documentation>Number of completed process instances</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <complexType name="ElementKPIType">
+        <annotation>
+        	<documentation>KPI/simulation results of an element</documentation>
+        </annotation>
+        <sequence>
+            <element name="duration" type="qbp:StatsValueType" minOccurs="1" maxOccurs="1">
+            	<annotation>
+            		<documentation>Duration stats</documentation>
+            	</annotation></element>
+            <element name="cost" type="qbp:StatsValueType" minOccurs="1" maxOccurs="1">
+            	<annotation>
+            		<documentation>Cost stats</documentation>
+            	</annotation></element>
+            <element name="waitingTime" type="qbp:StatsValueType" minOccurs="1" maxOccurs="1">
+            	<annotation>
+            		<documentation>Waiting time stats</documentation>
+            	</annotation></element>
+            <element name="idleTime" type="qbp:StatsValueType" minOccurs="1" maxOccurs="1">
+            	<annotation>
+            		<documentation>Idle time (resources not working, activity started but not completed)</documentation>
+            	</annotation></element>
+            <element name="costOverThreshold" type="qbp:StatsValueType" minOccurs="1" maxOccurs="1">
+            	<annotation>
+            		<documentation>Cost over threshold stats</documentation>
+            	</annotation></element>
+            <element name="durationOverThreshold" type="qbp:StatsValueType" minOccurs="1"  maxOccurs="1">
+            	<annotation>
+            		<documentation>Duration over threshold stats (in seconds)</documentation>
+            	</annotation></element>
+            <element name="count" type="int" minOccurs="1" maxOccurs="1">
+            	<annotation>
+            		<documentation>Count of completed elements</documentation>
+            	</annotation></element>
+        </sequence>
+        <attribute name="id" type="string">
+        	<annotation>
+        		<documentation>ID of the element</documentation>
+        	</annotation></attribute>
+        <attribute name="name" type="string">
+        	<annotation>
+        		<documentation>Element name</documentation>
+        	</annotation></attribute>
+    </complexType>
+
+    <complexType name="ResourceKPIType">
+        <annotation>
+        	<documentation>KPI/statistics of a resource</documentation>
+        </annotation>
+        <sequence>
+            <element name="utilization" type="double" minOccurs="1" maxOccurs="1">
+            	<annotation>
+            		<documentation>Utilization, from 0 to 1</documentation>
+            	</annotation></element>
+        </sequence>
+        <attribute name="id" type="string">
+        	<annotation>
+        		<documentation>Resource Id</documentation>
+        	</annotation></attribute>
+    </complexType>
+
+
+    <complexType name="HistogramDataType">
+        <annotation>
+        	<documentation>Defines a histogram</documentation>
+        </annotation>
+        <sequence>
+            <element name="min" type="double" minOccurs="1"
+    			maxOccurs="1">
+                <annotation>
+                	<documentation>Minimum value</documentation>
+                </annotation>
+            </element>
+            <element name="max" type="double" minOccurs="1"
+    			maxOccurs="1">
+                <annotation>
+                	<documentation>Maximum value</documentation>
+                </annotation>
+            </element>
+            <element name="binWidth" type="double" minOccurs="1"
+    			maxOccurs="1">
+                <annotation>
+                	<documentation>Bin width for histogram</documentation>
+                </annotation>
+            </element>
+            <element name="values" minOccurs="1" maxOccurs="1">
+                <annotation>
+                	<documentation>Values for each bin</documentation>
+                </annotation>
+                <complexType>
+                    <annotation>
+                    	<documentation>Double value</documentation>
+                    </annotation>
+                    <sequence>
+                        <element name="value" type="double" minOccurs="0" maxOccurs="unbounded">
+                        	<annotation>
+                        		<documentation>value</documentation>
+                        	</annotation></element>
+                    </sequence>
+                </complexType>
+            </element>
+        </sequence>
+    </complexType>
+
+    <complexType name="SimulationSimulatorStatsType">
+        <annotation>
+        	<documentation>Simulation performance statistics</documentation>
+        </annotation>
+        <sequence>
+            <element name="enabled" type="int">
+            	<annotation>
+            		<documentation>Number of enabled elements</documentation>
+            	</annotation></element>
+            <element name="started" type="int">
+            	<annotation>
+            		<documentation>Number of started elements</documentation>
+            	</annotation></element>
+            <element name="completed" type="int">
+            	<annotation>
+            		<documentation>Number of completed elements</documentation>
+            	</annotation></element>
+
+            <element name="startTime" type="long">
+            	<annotation>
+            		<documentation>Simulation start timestamp</documentation>
+            	</annotation></element>
+            <element name="endTime" type="long">
+            	<annotation>
+            		<documentation>Simulation end timestamp</documentation>
+            	</annotation></element>
+            <element name="processedElements" type="int">
+            	<annotation>
+            		<documentation>Number of processed elements by simulation engine</documentation>
+            	</annotation></element>
+        </sequence>
+    </complexType>
+
+
+    <complexType name="SimulationKPIType">
+        <sequence>
+            <element name="process" type="qbp:ProcessKPIType"
+                minOccurs="1" maxOccurs="1">
+                <annotation>
+                    <documentation>Overall business process simulation results</documentation>
+                </annotation>
+            </element>
+            <element name="elements" minOccurs="1" maxOccurs="1">
+                <annotation>
+                    <documentation>List of elements for which KPIs were calculated in a simulation</documentation>
+                </annotation>
+                <complexType>
+                    <sequence>
+                        <element name="element" type="qbp:ElementKPIType" minOccurs="0" maxOccurs="unbounded"/>
+                    </sequence>
+                </complexType>
+            </element>
+            <element name="resources" minOccurs="1" maxOccurs="1">
+                <annotation>
+                    <documentation>List of resource KPIs from the simulation</documentation>
+                </annotation>
+                <complexType>
+                    <sequence>
+                        <element name="resource"
+                            type="qbp:ResourceKPIType" minOccurs="0" maxOccurs="unbounded">
+                        </element>
+                    </sequence>
+                </complexType>
+            </element>
+        </sequence>
+        <attribute name="version" type="float" use="optional" default="1">
+            <annotation>
+                <documentation>API version</documentation>
+            </annotation>
+        </attribute>
+    </complexType>
+
+    <element name="SimulationKPIResponse">
+        <annotation>
+            <documentation>Response for simulation results/KPI request</documentation>
+        </annotation>
+        <complexType>
+	        <complexContent>
+	             <extension base="qbp:SimulationKPIType"></extension>
+	        </complexContent>
+        </complexType>
+    </element>
+
+
+    <element name="SimulationSimulatorStatsResponse">
+        <annotation>
+        	<documentation>Simulator performance/stats related information response</documentation>
+        </annotation>
+        <complexType>
+            <annotation>
+            	<documentation>Simulator stats response type</documentation>
+            </annotation>
+            <complexContent>
+                <extension base="qbp:SimulationSimulatorStatsType">
+                    <attribute name="version" type="float" use="optional" default="1">
+                        <annotation>
+                            <documentation>API version</documentation>
+                        </annotation>
+                    </attribute>
+                </extension>
+            </complexContent>
+        </complexType>
+    </element>
+
+    <element name="SimulationHistogramResponse">
+        <annotation>
+        	<documentation>Response containing data to create a histogram of given value series</documentation>
+        </annotation>
+        <complexType>
+            <annotation>
+            	<documentation>Simulation histogram data response type</documentation>
+            </annotation>
+            <complexContent>
+                <extension base="qbp:HistogramDataType">
+                    <attribute name="version" type="float" use="optional" default="1">
+                        <annotation>
+                            <documentation>API version</documentation>
+                        </annotation>
+                    </attribute>
+                </extension>
+            </complexContent>
+        </complexType>
+    </element>
+
+    <complexType name="StatsValueType">
+        <annotation>
+            <documentation>Statistics of a KPI</documentation>
+        </annotation>
+        <sequence>
+            <element name="min" type="double" minOccurs="1" maxOccurs="1">
+            	<annotation>
+            		<documentation>Minimum</documentation>
+            	</annotation></element>
+            <element name="max" type="double" minOccurs="1" maxOccurs="1">
+            	<annotation>
+            		<documentation>Maximum</documentation>
+            	</annotation></element>
+            <element name="average" type="double" maxOccurs="1" minOccurs="1">
+            	<annotation>
+            		<documentation>Average</documentation>
+            	</annotation></element>
+        </sequence>
+    </complexType>
+
+    <element name="Results">
+        <annotation>
+            <documentation>Results of the simulation. Includes KPI stats and common data for charts</documentation>
+        </annotation>
+        <complexType>
+            <annotation>
+                <documentation>Results of the simulation. Includes KPI stats and common data for charts</documentation>
+            </annotation>
+            <complexContent>
+                <extension base="qbp:ResultsType">
+                    <attribute name="version" type="float" use="optional" default="1">
+                        <annotation>
+                            <documentation>API version</documentation>
+                        </annotation>
+                    </attribute>
+                </extension>
+            </complexContent>
+        </complexType>
+    </element>
+
+    <complexType name="ResultsType">
+        <annotation>
+            <documentation>Results of the simulation. Includes KPI stats and common data for charts</documentation>
+        </annotation>
+    	<sequence>
+    		<element name="Results" type="qbp:SimulationKPIType">
+    			<annotation>
+    				<documentation>Basic KPI stats</documentation>
+    			</annotation></element>
+    		<element name="CycleTimesData" type="qbp:HistogramDataType" minOccurs="0" maxOccurs="1">
+    			<annotation>
+    				<documentation>Duration histogram data</documentation>
+    			</annotation></element>
+    		<element name="CycleTimesInTimetableData" type="qbp:HistogramDataType" minOccurs="0" maxOccurs="1">
+    			<annotation>
+    				<documentation>Durations in timetable histogram data</documentation>
+    			</annotation></element>
+    		<element name="WaitingTimesData" type="qbp:HistogramDataType" minOccurs="0" maxOccurs="1">
+    			<annotation>
+    				<documentation>Waiting times histogram data</documentation>
+    			</annotation></element>
+    		<element name="CostsData" type="qbp:HistogramDataType" minOccurs="0" maxOccurs="1">
+    			<annotation>
+    				<documentation>Costs histogram data</documentation>
+    			</annotation></element>
+    	</sequence>
+    </complexType>
+</schema>
