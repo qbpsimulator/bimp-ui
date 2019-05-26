@@ -5,7 +5,6 @@ import * as Primitive from '../xml-primitives';
 
 
 interface BaseType {
-	_exists: boolean;
 	_namespace: string;
 }
 /** KPI/simulation results of an element */
@@ -194,9 +193,10 @@ interface SimulationStatusResponseType extends _SimulationStatusResponseType { c
 /** Simulation status type */
 interface _SimulationStatusType extends BaseType {
 	completed: number;
-	error: SimulationError;
+	errorCode?: SimulationError;
 	status: SimulationStatus;
 	total: number;
+	errorMessage?: string;
 	errorDetails?: string;
 }
 export interface SimulationStatusType extends _SimulationStatusType { constructor: { new(): SimulationStatusType }; }

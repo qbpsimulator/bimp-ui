@@ -5,7 +5,6 @@ import * as Primitive from '../xml-primitives';
 
 
 interface BaseType {
-	_exists: boolean;
 	_namespace: string;
 }
 /** Defines a histogram distribution bin for distributions of type HISTOGRAM */
@@ -43,7 +42,7 @@ interface _DistributionInfo extends BaseType {
 	  * equal to 100. */
 	histogramDataBins?: DistributionInfoHistogramDataBinsType;
 	/** Does not actually specify time unit - values must be given always in seconds. This is only for user interfaces to store the user selection. */
-	timeUnit?: DistributionInfoTimeUnitType;
+	timeUnit?: TimeUnitType;
 }
 export interface DistributionInfo extends _DistributionInfo { constructor: { new(): DistributionInfo }; }
 export var DistributionInfo: { new(): DistributionInfo };
@@ -54,8 +53,13 @@ interface _DistributionInfoHistogramDataBinsType extends BaseType {
 }
 interface DistributionInfoHistogramDataBinsType extends _DistributionInfoHistogramDataBinsType { constructor: { new(): DistributionInfoHistogramDataBinsType }; }
 
-type DistributionInfoTimeUnitType = ("seconds" | "minutes" | "hours" | "days");
-interface _DistributionInfoTimeUnitType extends Primitive._string { content: DistributionInfoTimeUnitType; }
+export type TimeUnit = ("seconds" | "minutes" | "hours" | "days");
+export type TimeUnitType = TimeUnit /* & {
+		"#text": ("seconds" | "minutes" | "hours" | "days");
+}*/
+
+// type DistributionInfoTimeUnitType = ("seconds" | "minutes" | "hours" | "days");
+// interface _DistributionInfoTimeUnitType extends Primitive._string { content: DistributionInfoTimeUnitType; }
 
 /** Distributions that are supported for durations. */
 export type DistributionType = ("FIXED" | "EXPONENTIAL" | "GAMMA" | "LOGNORMAL" | "NORMAL" | "TRIANGULAR" | "UNIFORM" | "HISTOGRAM");
@@ -83,7 +87,7 @@ interface _ElementSimulationInfoType extends BaseType {
 	/** Duration of the element in seconds */
 	durationDistribution: DistributionInfo;
 	/** Does not actually specify time unit - values must be given always in seconds. This is only for user interfaces to store the user selection. */
-	durationThresholdTimeUnit?: ElementSimulationInfoTypeDurationThresholdTimeUnitType;
+	durationThresholdTimeUnit?: TimeUnitType;
 	/** List of resources that can be used to handle the
 	  * element. One supported. Required for tasks. */
 	resourceIds: ElementSimulationInfoTypeResourceIdsType;
@@ -91,8 +95,8 @@ interface _ElementSimulationInfoType extends BaseType {
 export interface ElementSimulationInfoType extends _ElementSimulationInfoType { constructor: { new(): ElementSimulationInfoType }; }
 export var ElementSimulationInfoType: { new(): ElementSimulationInfoType };
 
-type ElementSimulationInfoTypeDurationThresholdTimeUnitType = ("seconds" | "minutes" | "hours" | "days");
-interface _ElementSimulationInfoTypeDurationThresholdTimeUnitType extends Primitive._string { content: ElementSimulationInfoTypeDurationThresholdTimeUnitType; }
+// type ElementSimulationInfoTypeDurationThresholdTimeUnitType = ("seconds" | "minutes" | "hours" | "days");
+// interface _ElementSimulationInfoTypeDurationThresholdTimeUnitType extends Primitive._string { content: ElementSimulationInfoTypeDurationThresholdTimeUnitType; }
 
 interface _ElementSimulationInfoTypeResourceIdsType extends BaseType {
 	/** ID of the resource */

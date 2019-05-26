@@ -63,7 +63,7 @@ export const SimulationReducer: Reducer<SimulationType> =
         case "SIMULATION_KPI_PARSE_FULFILLED":
             const kpiResponse = action.payload.SimulationKPIResponse;
 
-            let results = new qbpapi.ResultsType();
+            let results = {} as qbpapi.ResultsType;
             results.Results = kpiResponse;
 
             return {...state, results: results, error: null }

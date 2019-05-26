@@ -3,17 +3,53 @@ var QBPApi_Module_Factory = function () {
     name: 'QBPApi',
     defaultElementNamespaceURI: 'http:\/\/www.qbp-simulator.com\/ApiSchema201212',
     typeInfos: [{
-        localName: 'ResourceKPIType',
+        localName: 'SimulationKPIType',
         propertyInfos: [{
-            name: 'utilization',
+            name: 'process',
             required: true,
-            typeInfo: 'Double'
+            typeInfo: '.ProcessKPIType'
           }, {
-            name: 'id',
+            name: 'elements',
+            required: true,
+            typeInfo: '.SimulationKPIType.Elements'
+          }, {
+            name: 'resources',
+            required: true,
+            typeInfo: '.SimulationKPIType.Resources'
+          }, {
+            name: 'version',
+            typeInfo: 'Float',
             attributeName: {
-              localPart: 'id'
+              localPart: 'version'
             },
             type: 'attribute'
+          }]
+      }, {
+        localName: 'SimulationSimulatorStatsType',
+        propertyInfos: [{
+            name: 'enabled',
+            required: true,
+            typeInfo: 'Int'
+          }, {
+            name: 'started',
+            required: true,
+            typeInfo: 'Int'
+          }, {
+            name: 'completed',
+            required: true,
+            typeInfo: 'Int'
+          }, {
+            name: 'startTime',
+            required: true,
+            typeInfo: 'Long'
+          }, {
+            name: 'endTime',
+            required: true,
+            typeInfo: 'Long'
+          }, {
+            name: 'processedElements',
+            required: true,
+            typeInfo: 'Int'
           }]
       }, {
         localName: 'HistogramDataType.Values',
@@ -43,99 +79,6 @@ var QBPApi_Module_Factory = function () {
             typeInfo: 'Boolean',
             attributeName: {
               localPart: 'generateMXML'
-            },
-            type: 'attribute'
-          }]
-      }, {
-        localName: 'SimulationKPIResponse',
-        typeName: null,
-        baseTypeInfo: '.SimulationKPIType'
-      }, {
-        localName: 'SimulationSimulatorStatsResponse',
-        typeName: null,
-        baseTypeInfo: '.SimulationSimulatorStatsType',
-        propertyInfos: [{
-            name: 'version',
-            typeInfo: 'Float',
-            attributeName: {
-              localPart: 'version'
-            },
-            type: 'attribute'
-          }]
-      }, {
-        localName: 'SimulationKPIType',
-        propertyInfos: [{
-            name: 'process',
-            required: true,
-            typeInfo: '.ProcessKPIType'
-          }, {
-            name: 'elements',
-            required: true,
-            typeInfo: '.SimulationKPIType.Elements'
-          }, {
-            name: 'resources',
-            required: true,
-            typeInfo: '.SimulationKPIType.Resources'
-          }, {
-            name: 'version',
-            typeInfo: 'Float',
-            attributeName: {
-              localPart: 'version'
-            },
-            type: 'attribute'
-          }]
-      }, {
-        localName: 'SimulationStatusResponse',
-        typeName: null,
-        propertyInfos: [{
-            name: 'status',
-            required: true,
-            typeInfo: '.SimulationStatusType'
-          }, {
-            name: 'version',
-            typeInfo: 'Float',
-            attributeName: {
-              localPart: 'version'
-            },
-            type: 'attribute'
-          }]
-      }, {
-        localName: 'HistogramDataType',
-        propertyInfos: [{
-            name: 'min',
-            required: true,
-            typeInfo: 'Double'
-          }, {
-            name: 'max',
-            required: true,
-            typeInfo: 'Double'
-          }, {
-            name: 'binWidth',
-            required: true,
-            typeInfo: 'Double'
-          }, {
-            name: 'values',
-            required: true,
-            typeInfo: '.HistogramDataType.Values'
-          }]
-      }, {
-        localName: 'StartSimulationResponse',
-        typeName: null,
-        propertyInfos: [{
-            name: 'status',
-            required: true,
-            typeInfo: '.SimulationStatusType'
-          }, {
-            name: 'id',
-            attributeName: {
-              localPart: 'id'
-            },
-            type: 'attribute'
-          }, {
-            name: 'version',
-            typeInfo: 'Float',
-            attributeName: {
-              localPart: 'version'
             },
             type: 'attribute'
           }]
@@ -183,6 +126,33 @@ var QBPApi_Module_Factory = function () {
             type: 'attribute'
           }]
       }, {
+        localName: 'SimulationStatusResponse',
+        typeName: null,
+        propertyInfos: [{
+            name: 'status',
+            required: true,
+            typeInfo: '.SimulationStatusType'
+          }, {
+            name: 'version',
+            typeInfo: 'Float',
+            attributeName: {
+              localPart: 'version'
+            },
+            type: 'attribute'
+          }]
+      }, {
+        localName: 'SimulationHistogramResponse',
+        typeName: null,
+        baseTypeInfo: '.HistogramDataType',
+        propertyInfos: [{
+            name: 'version',
+            typeInfo: 'Float',
+            attributeName: {
+              localPart: 'version'
+            },
+            type: 'attribute'
+          }]
+      }, {
         localName: 'StatsValueType',
         propertyInfos: [{
             name: 'min',
@@ -198,40 +168,92 @@ var QBPApi_Module_Factory = function () {
             typeInfo: 'Double'
           }]
       }, {
-        localName: 'SimulationSimulatorStatsType',
-        propertyInfos: [{
-            name: 'enabled',
-            required: true,
-            typeInfo: 'Int'
-          }, {
-            name: 'started',
-            required: true,
-            typeInfo: 'Int'
-          }, {
-            name: 'completed',
-            required: true,
-            typeInfo: 'Int'
-          }, {
-            name: 'startTime',
-            required: true,
-            typeInfo: 'Long'
-          }, {
-            name: 'endTime',
-            required: true,
-            typeInfo: 'Long'
-          }, {
-            name: 'processedElements',
-            required: true,
-            typeInfo: 'Int'
-          }]
-      }, {
-        localName: 'SimulationKPIType.Elements',
+        localName: 'StartSimulationResponse',
         typeName: null,
         propertyInfos: [{
-            name: 'element',
+            name: 'status',
+            required: true,
+            typeInfo: '.SimulationStatusType'
+          }, {
+            name: 'id',
+            attributeName: {
+              localPart: 'id'
+            },
+            type: 'attribute'
+          }, {
+            name: 'version',
+            typeInfo: 'Float',
+            attributeName: {
+              localPart: 'version'
+            },
+            type: 'attribute'
+          }]
+      }, {
+        localName: 'SimulationKPIResponse',
+        typeName: null,
+        baseTypeInfo: '.SimulationKPIType'
+      }, {
+        localName: 'ResourceKPIType',
+        propertyInfos: [{
+            name: 'utilization',
+            required: true,
+            typeInfo: 'Double'
+          }, {
+            name: 'id',
+            attributeName: {
+              localPart: 'id'
+            },
+            type: 'attribute'
+          }]
+      }, {
+        localName: 'Results',
+        typeName: null,
+        baseTypeInfo: '.ResultsType',
+        propertyInfos: [{
+            name: 'version',
+            typeInfo: 'Float',
+            attributeName: {
+              localPart: 'version'
+            },
+            type: 'attribute'
+          }]
+      }, {
+        localName: 'SimulationKPIType.Resources',
+        typeName: null,
+        propertyInfos: [{
+            name: 'resource',
             minOccurs: 0,
             collection: true,
-            typeInfo: '.ElementKPIType'
+            typeInfo: '.ResourceKPIType'
+          }]
+      }, {
+        localName: 'SimulationStatusType',
+        propertyInfos: [{
+            name: 'errorCode'
+          }, {
+            name: 'errorMessage'
+          }, {
+            name: 'errorDetails'
+          }, {
+            name: 'status',
+            attributeName: {
+              localPart: 'status'
+            },
+            type: 'attribute'
+          }, {
+            name: 'completed',
+            typeInfo: 'Int',
+            attributeName: {
+              localPart: 'completed'
+            },
+            type: 'attribute'
+          }, {
+            name: 'total',
+            typeInfo: 'Int',
+            attributeName: {
+              localPart: 'total'
+            },
+            type: 'attribute'
           }]
       }, {
         localName: 'ProcessKPIType',
@@ -273,9 +295,18 @@ var QBPApi_Module_Factory = function () {
             typeInfo: 'Int'
           }]
       }, {
-        localName: 'SimulationHistogramResponse',
+        localName: 'SimulationKPIType.Elements',
         typeName: null,
-        baseTypeInfo: '.HistogramDataType',
+        propertyInfos: [{
+            name: 'element',
+            minOccurs: 0,
+            collection: true,
+            typeInfo: '.ElementKPIType'
+          }]
+      }, {
+        localName: 'SimulationSimulatorStatsResponse',
+        typeName: null,
+        baseTypeInfo: '.SimulationSimulatorStatsType',
         propertyInfos: [{
             name: 'version',
             typeInfo: 'Float',
@@ -283,6 +314,25 @@ var QBPApi_Module_Factory = function () {
               localPart: 'version'
             },
             type: 'attribute'
+          }]
+      }, {
+        localName: 'HistogramDataType',
+        propertyInfos: [{
+            name: 'min',
+            required: true,
+            typeInfo: 'Double'
+          }, {
+            name: 'max',
+            required: true,
+            typeInfo: 'Double'
+          }, {
+            name: 'binWidth',
+            required: true,
+            typeInfo: 'Double'
+          }, {
+            name: 'values',
+            required: true,
+            typeInfo: '.HistogramDataType.Values'
           }]
       }, {
         localName: 'ResultsType',
@@ -309,87 +359,31 @@ var QBPApi_Module_Factory = function () {
             typeInfo: '.HistogramDataType'
           }]
       }, {
-        localName: 'Results',
-        typeName: null,
-        baseTypeInfo: '.ResultsType',
-        propertyInfos: [{
-            name: 'version',
-            typeInfo: 'Float',
-            attributeName: {
-              localPart: 'version'
-            },
-            type: 'attribute'
-          }]
-      }, {
-        localName: 'SimulationStatusType',
-        propertyInfos: [{
-            name: 'errorDetails'
-          }, {
-            name: 'status',
-            attributeName: {
-              localPart: 'status'
-            },
-            type: 'attribute'
-          }, {
-            name: 'error',
-            attributeName: {
-              localPart: 'error'
-            },
-            type: 'attribute'
-          }, {
-            name: 'completed',
-            typeInfo: 'Int',
-            attributeName: {
-              localPart: 'completed'
-            },
-            type: 'attribute'
-          }, {
-            name: 'total',
-            typeInfo: 'Int',
-            attributeName: {
-              localPart: 'total'
-            },
-            type: 'attribute'
-          }]
-      }, {
-        localName: 'SimulationKPIType.Resources',
-        typeName: null,
-        propertyInfos: [{
-            name: 'resource',
-            minOccurs: 0,
-            collection: true,
-            typeInfo: '.ResourceKPIType'
-          }]
-      }, {
-        type: 'enumInfo',
-        localName: 'SimulationError',
-        values: ['INVALID_INPUT', 'SIMULATION_ERROR', 'IO_ERROR']
-      }, {
         type: 'enumInfo',
         localName: 'SimulationStatus',
         values: ['QUEUED', 'RUNNING', 'FAILED', 'FINALIZING', 'COMPLETED']
       }],
     elementInfos: [{
+        elementName: 'SimulationSimulatorStatsResponse',
+        typeInfo: '.SimulationSimulatorStatsResponse'
+      }, {
+        elementName: 'StartSimulationRequest',
+        typeInfo: '.StartSimulationRequest'
+      }, {
+        elementName: 'SimulationStatusResponse',
+        typeInfo: '.SimulationStatusResponse'
+      }, {
         elementName: 'StartSimulationResponse',
         typeInfo: '.StartSimulationResponse'
+      }, {
+        elementName: 'SimulationHistogramResponse',
+        typeInfo: '.SimulationHistogramResponse'
       }, {
         elementName: 'Results',
         typeInfo: '.Results'
       }, {
         elementName: 'SimulationKPIResponse',
         typeInfo: '.SimulationKPIResponse'
-      }, {
-        elementName: 'StartSimulationRequest',
-        typeInfo: '.StartSimulationRequest'
-      }, {
-        elementName: 'SimulationSimulatorStatsResponse',
-        typeInfo: '.SimulationSimulatorStatsResponse'
-      }, {
-        elementName: 'SimulationHistogramResponse',
-        typeInfo: '.SimulationHistogramResponse'
-      }, {
-        elementName: 'SimulationStatusResponse',
-        typeInfo: '.SimulationStatusResponse'
       }]
   };
   return {

@@ -13,18 +13,17 @@ export class ProcessSimulationInfo {
 
 
     public static createAndInit(parser: BPMNParser): Types.ProcessSimulationInfoType {
-        const baseType = new Types.ProcessSimulationInfoType();
+        const baseType = {} as Types.ProcessSimulationInfoType;
         const d = new Date();
         let simInfo = {...baseType,
-            _exists: true,
             id: Utils.Guid(),
             currency: 'EUR',
             startDateTime: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 9, 0, 0, 0),
             arrivalRateDistribution: Helpers.createDistributionInfo(),
-            elements: {...baseType.elements, element: [], _exists: true},
-            resources: {...baseType.resources, resource: [], _exists: true},
-            sequenceFlows: {...baseType.sequenceFlows, sequenceFlow: [], _exists: true},
-            timetables: {...baseType.timetables, timetable: [], _exists: true}
+            elements: {...baseType.elements, element: []},
+            resources: {...baseType.resources, resource: []},
+            sequenceFlows: {...baseType.sequenceFlows, sequenceFlow: []},
+            timetables: {...baseType.timetables, timetable: []}
         };
 
         simInfo.arrivalRateDistribution.type = 'FIXED';
@@ -75,20 +74,18 @@ export class ProcessSimulationInfo {
             return !!timeTable;
         };
 
-        const baseTimetable = new Types.TimeTable();
-        const baseRule = new Types.TimeTableRule();
+        const baseTimetable = {} as Types.TimeTable;
+        const baseRule = {} as Types.TimeTableRule;
 
         if (!hasDefaultTimetable()) {
             const t = {...baseTimetable,
-                _exists: true,
                 id: this.DEFAULT_TIMETABLE_ID,
                 default: true,
                 name: "Default",
-                rules: {...baseTimetable.rules, rule: [], _exists: true}
+                rules: {...baseTimetable.rules, rule: []}
             };
 
             const rule = {...baseRule,
-                _exists: true,
                 fromWeekDay: "MONDAY",
                 fromTime: "09:00:00.000+00:00",
                 toWeekDay: "FRIDAY",
@@ -101,15 +98,13 @@ export class ProcessSimulationInfo {
 
         if (!hasTimetable(this.DEFAULT_247_TIMETABLE_ID)) {
             const t = {...baseTimetable,
-                _exists: true,
                 id: this.DEFAULT_247_TIMETABLE_ID,
                 default: false,
                 name: "24/7",
-                rules: {...baseTimetable.rules, rule: [], _exists: true}
+                rules: {...baseTimetable.rules, rule: []}
             };
 
             const rule = {...baseRule,
-                _exists: true,
                 fromWeekDay: "MONDAY",
                 fromTime: "00:00:00.000+00:00",
                 toWeekDay: "SUNDAY",
@@ -134,9 +129,8 @@ export class ProcessSimulationInfo {
             if (hasResource(lane.id))
                 return;
 
-            const baseResource = new Types.Resource();
+            const baseResource = {} as Types.Resource;
             const r = {...baseResource,
-                _exists: true,
                 id: lane.id,
                 name: lane.name ? lane.name : 'Lane ' + lane.id,
                 timetableId: this.DEFAULT_TIMETABLE_ID
@@ -147,9 +141,8 @@ export class ProcessSimulationInfo {
 
         // ensure we have at least one resource
         if (resources.length === 0) {
-            const baseResource = new Types.Resource();
+            const baseResource = {} as Types.Resource;
             const r = {...baseResource,
-                _exists: true,
                 id: this.DEFAULT_RESOURCE_ID,
                 name: 'Default Resource',
                 timetableId: this.DEFAULT_TIMETABLE_ID,
@@ -162,9 +155,8 @@ export class ProcessSimulationInfo {
         let serviceTaskCount = 0;
         parser.getTasks().forEach(t => t.nodeName === 'serviceTask' || t.nodeName === 'scriptTask' ? ++serviceTaskCount : 0);
         if (serviceTaskCount > 0 && !hasResource(this.SERVICE_RESOURCE_ID)) {
-            const baseResource = new Types.Resource();
+            const baseResource = {} as Types.Resource;
             const r = {...baseResource,
-                _exists: true,
                 id: this.SERVICE_RESOURCE_ID,
                 name: 'Automated Service',
                 timetableId: this.DEFAULT_247_TIMETABLE_ID,
@@ -183,9 +175,8 @@ export class ProcessSimulationInfo {
             if (existingElements.has(e.id))
                 return;
 
-            const baseElement = new Types.ElementSimulationInfoType();
+            const baseElement = {} as Types.ElementSimulationInfoType;
             const element = {...baseElement,
-                _exists: true,
                 id: Utils.Guid(),
                 elementId: e.id,
                 durationDistribution: Helpers.createDistributionInfo()
@@ -219,13 +210,11 @@ export class ProcessSimulationInfo {
             if (existingElements.has(t.id))
                 return;
 
-            const baseElement = new Types.ElementSimulationInfoType();
+            const baseElement = {} as Types.ElementSimulationInfoType;
             const element = {...baseElement,
-                _exists: true,
                 id: Utils.Guid(),
                 elementId: t.id,
                 resourceIds: {...baseElement.resourceIds,
-                    _exists: true,
                     resourceId: t.nodeName === 'serviceTask' || t.nodeName === 'scriptTask' ?
                         this.SERVICE_RESOURCE_ID :
                         getDefaultResourceId(t)
@@ -246,9 +235,8 @@ export class ProcessSimulationInfo {
                 if (existingElements.has(sf.id))
                     return;
 
-                const baseElement = new Types.SequenceFlowSimulationInfoType();
+                const baseElement = {} as Types.SequenceFlowSimulationInfoType;
                 let element = {...baseElement,
-                    _exists: true,
                     elementId: sf.id,
                     executionProbability: g.isInclusive ? 1.0 : (1.0 / g.sequenceFlows.length)
                 }

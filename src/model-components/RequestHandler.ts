@@ -1,5 +1,4 @@
 import * as xmlbeautify from 'xml-beautifier';
-import * as cxml from 'cxml';
 import axios from 'axios';
 
 import { store } from '../store'
@@ -9,6 +8,7 @@ import * as jsonixAPI from '../../xmlns/QBPApi'
 
 import BPMNParser from './BPMNParser'
 import QBPSerializer from './QBPSerializer'
+import { parseAsync } from '../XMLParser';
 
 
 export default class RequestHandler {
@@ -44,11 +44,10 @@ export default class RequestHandler {
         modelData = modelData.map(s =>
             '<![CDATA[' + s.replace(/]]>/gi, ']]]]><![CDATA[>') + ']]>');
 
-        let request = {...qbpapi.document.StartSimulationRequest,
+        let request = {
             'modelData': modelData,
             'generateMXML': generateMxml,
             'version': 1,
-            '_exists': true
         };
 
         const serializer = new QBPSerializer(jsonixAPI.QBPApi);
@@ -74,10 +73,10 @@ export default class RequestHandler {
             }
         })
         .then(response => {
-            let parser = new cxml.Parser();
+
             store.dispatch({
                 type: "START_SIMULATION_PARSE",
-                payload: parser.parse(response.value.data, qbpapi.document)
+                payload: parseAsync<qbpapi.document>(response.value.data)
             });
         });
     }
@@ -94,10 +93,9 @@ export default class RequestHandler {
             })
         })
         .then(response => {
-            let parser = new cxml.Parser();
             store.dispatch({
                 type: "SIMULATION_STATUS_PARSE",
-                payload: parser.parse(response.value.data, qbpapi.document)
+                payload: parseAsync<qbpapi.document>(response.value.data)
             });
         });
     }
@@ -114,10 +112,9 @@ export default class RequestHandler {
             })
         })
         .then(response => {
-            let parser = new cxml.Parser();
             store.dispatch({
                 type: "SIMULATION_KPI_PARSE",
-                payload: parser.parse(response.value.data, qbpapi.document)
+                payload: parseAsync<qbpapi.document>(response.value.data)
             });
         });
     }
@@ -134,10 +131,9 @@ export default class RequestHandler {
             })
         })
         .then(response => {
-            let parser = new cxml.Parser();
             store.dispatch({
                 type: "SIMULATION_PROCESS_DURATION_PARSE",
-                payload: parser.parse(response.value.data, qbpapi.document)
+                payload: parseAsync<qbpapi.document>(response.value.data)
             });
         });
     }
@@ -154,10 +150,9 @@ export default class RequestHandler {
             })
         })
         .then(response => {
-            let parser = new cxml.Parser();
             store.dispatch({
                 type: "SIMULATION_PROCESS_CYCLETIME_PARSE",
-                payload: parser.parse(response.value.data, qbpapi.document)
+                payload: parseAsync<qbpapi.document>(response.value.data)
             });
         });
     }
@@ -174,10 +169,9 @@ export default class RequestHandler {
             })
         })
         .then(response => {
-            let parser = new cxml.Parser();
             store.dispatch({
                 type: "SIMULATION_PROCESS_WAITINGTIME_PARSE",
-                payload: parser.parse(response.value.data, qbpapi.document)
+                payload: parseAsync<qbpapi.document>(response.value.data)
             });
         });
     }
@@ -194,10 +188,9 @@ export default class RequestHandler {
             })
         })
         .then(response => {
-            let parser = new cxml.Parser();
             store.dispatch({
                 type: "SIMULATION_PROCESS_COST_PARSE",
-                payload: parser.parse(response.value.data, qbpapi.document)
+                payload: parseAsync<qbpapi.document>(response.value.data)
             });
         });
     }

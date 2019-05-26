@@ -35,31 +35,31 @@ export class Helpers {
     }
 
     public static createResource(): Types.Resource {
-        return {...new Types.Resource(),
+        return {
             id: Utils.Guid(),
             costPerHour: 0,
             name: "",
             timetableId: "",
             totalAmount: 1,
-        }
+        } as Types.Resource;
     }
 
     public static createTimeTable(): Types.TimeTable {
-        let rule = {...new Types.TimeTableRule(),
+        let rule = {
             fromTime: '09:00:00',
             toTime: '17:00:00'
-        };
+        } as Types.TimeTableRule;
         rule.fromWeekDay = 'MONDAY';
         rule.toWeekDay = 'FRIDAY';
 
-        let timetable = {...new Types.TimeTable(),
+        let timetable = {
             id: Utils.Guid(),
             default: false,
             costPerHour: 0,
             name: "",
             timetableId: "",
             totalAmount: 1
-        }
+        } as any as Types.TimeTable;
 
         const rules = {...timetable.rules, rule: [rule]};
         timetable.rules = rules;
@@ -67,8 +67,7 @@ export class Helpers {
     }
 
     public static createDistributionInfo(): Types.DistributionInfo {
-        let elem = new Types.DistributionInfo();
-        elem._exists = true;
+        let elem = {} as Types.DistributionInfo;
         elem.arg1 = 0;
         elem.arg2 = 0;
         elem.mean = 0;
@@ -79,7 +78,7 @@ export class Helpers {
     }
 
     public static createDistributionHistogramBin(probability: number) {
-        let item = new Types.DistributionHistogramBin();
+        let item = {} as Types.DistributionHistogramBin;
 
         item.distribution = Helpers.createDistributionInfo();
         item.probability = probability;
@@ -88,7 +87,7 @@ export class Helpers {
     }
 
     public static createDefaultHistogramDataBins(): Types.DistributionInfoHistogramDataBinsType {
-        const di = new Types.DistributionInfo();
+        const di = {} as Types.DistributionInfo;
         let item = {...di.histogramDataBins,
             histogramData: [
                 this.createDistributionHistogramBin(1)

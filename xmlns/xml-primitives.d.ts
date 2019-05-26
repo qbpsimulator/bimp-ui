@@ -1,10 +1,9 @@
 
 // Source files:
-// 
+//
 
 
 interface BaseType {
-	_exists: boolean;
 	_namespace: string;
 }
 export interface _any extends BaseType { content: any; }

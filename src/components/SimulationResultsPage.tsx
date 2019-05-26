@@ -200,7 +200,7 @@ export default class SimulationResultsPage extends React.Component<Props, State>
     }
 
     private createBarChart(options: any, data: qbpapi.HistogramDataType, id: string, formatTime: boolean = true): Chart {
-        if (!data || !data._exists)
+        if (!data)
             return (<ProgressBar
                 type='circular'
                 mode='indeterminate'
@@ -275,7 +275,7 @@ export default class SimulationResultsPage extends React.Component<Props, State>
     }
 
     private createResourceUtilizationChart(kpiData: qbpapi.SimulationKPIType, id: string): Chart {
-        if (!kpiData || !kpiData._exists)
+        if (!kpiData)
             return null;
 
         const defaultOptions = {

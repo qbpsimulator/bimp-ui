@@ -49,7 +49,7 @@ export default class SimulationStatusDialog extends React.PureComponent<Props, S
             return;
 
         const simulation = this.props.simulation;
-        const error = !!simulation && !!simulation.status && typeof(simulation.status.error) === 'string' ? simulation.status.error : "Unknown";
+        const error = !!simulation && !!simulation.status && typeof(simulation.status.errorCode) === 'string' ? simulation.status.errorCode : "Unknown";
 
         this.props.lastModelData.forEach(modelData => {
             Utils.ReportErrorStackError(this.props.errorStackApiKey,
@@ -70,7 +70,7 @@ export default class SimulationStatusDialog extends React.PureComponent<Props, S
         if (!!simulation && simulation.pending)
             return true;
 
-        const isError = !!simulation.error || !!simulation.status && (typeof(simulation.status.error) === 'string');
+        const isError = !!simulation.error || !!simulation.status && (typeof(simulation.status.errorCode) === 'string');
         return !isError && !!simulation && (simulation.pending ||
             (!!simulation.status && simulation.status.status != 'COMPLETED' && simulation.status.status != 'FAILED'));
     }
@@ -80,7 +80,7 @@ export default class SimulationStatusDialog extends React.PureComponent<Props, S
         if (!simulation)
             return null;
 
-        const isError = !!simulation.error || !!simulation.status && (typeof(simulation.status.error) === 'string');
+        const isError = !!simulation.error || !!simulation.status && (typeof(simulation.status.errorCode) === 'string');
         let actions = [];
 
         let infoText = '';
@@ -111,11 +111,14 @@ export default class SimulationStatusDialog extends React.PureComponent<Props, S
             }
 
             if (!!simulation.status) {
-                if (typeof(simulation.status.error) === 'string' && !!simulation.status.error)
-                    statusText += 'Error: ' + simulation.status.error;
+                if (!!simulation.status.errorCode)
+                    statusText += 'Error: ' + simulation.status.errorCode;
 
-                if (typeof(simulation.status.errorDetails) === 'string' && !!simulation.status.errorDetails)
-                    detailsText = simulation.status.errorDetails;
+                if (!!simulation.status.errorMessage)
+                    detailsText = simulation.status.errorMessage;
+
+                if (!!simulation.status.errorDetails)
+                    detailsText += " (" + simulation.status.errorDetails + ")";
             }
         }
         else if (this.isRunning()) {

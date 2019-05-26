@@ -72,7 +72,7 @@ export default class QBPSerializer {
                 const elementsToPopulate = (propInfo.collection && jsonData[dataName] && jsonData[dataName].length > 0) ? jsonData[dataName] : new Array(jsonData[dataName]);
 
                 elementsToPopulate.forEach(data => {
-                    if (data.hasOwnProperty('_exists') && !data._exists)
+                    if (!data)
                         return null;
 
                     if (!doc) {
@@ -104,7 +104,7 @@ export default class QBPSerializer {
                 if (typeof(val) === 'undefined')
                     return null;
 
-                if (typeof(val) ==='object' && val.hasOwnProperty('_exists') && !val._exists)
+                if (typeof(val) ==='object' && !val)
                     return null;
 
                 let node = doc.createElementNS(namespaceURI, prefix + dataName);

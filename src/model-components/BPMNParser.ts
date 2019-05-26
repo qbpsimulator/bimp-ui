@@ -1,4 +1,3 @@
-import * as cxml from 'cxml';
 import * as qbp from '../../xmlns/www.qbp-simulator.com/Schema201212';
 import * as qbpapi from '../../xmlns/www.qbp-simulator.com/ApiSchema201212'
 
@@ -9,6 +8,7 @@ import { CallActivityType, CatchEventType, LaneType, GatewayType,
     ProcessDefinitionType, SequenceFlowType, TaskType } from '../types'
 
 import BPMNDocumentConverter from './BPMNDocumentConverter'
+import { parse } from '../XMLParser';
 
 export default class BPMNParser {
     public static readonly BIMP_URI = "http://www.qbp-simulator.com/Schema201212";
@@ -67,10 +67,8 @@ export default class BPMNParser {
 
                         if (qbpSimInfoXmlString) {
                             // append xml node for parser
-                            let parser = new cxml.Parser();
-
-                            return parser.parse(qbpSimInfoXmlString, qbp.document)
-                            .then((doc: qbp.document) => {
+                            try {
+                                const doc = parse<qbp.document>(qbpSimInfoXmlString);
                                 ProcessSimulationInfo.ensureDefaults(doc.processSimulationInfo, this);
                                 this._parsedSimInfo = doc.processSimulationInfo;
 
@@ -82,28 +80,27 @@ export default class BPMNParser {
                                 const resultElements = this._document.documentElement.getElementsByTagNameNS(BPMNParser.BIMPAPI_URI, BPMNParser.BIMPAPI_RESULTS_TAG);
                                 if (resultElements.length > 0) {
                                     const resultsXmlString = new XMLSerializer().serializeToString(resultElements[0]);
-
-                                    return parser.parse(resultsXmlString, qbpapi.document)
-                                    .then((resultsDoc: qbpapi.document) => {
+                                    try {
+                                        const resultsDoc = parse<qbpapi.document>(resultsXmlString);
                                         this._parsedResults = resultsDoc.Results;
                                         if (process.env.NODE_ENV !== 'production') {
                                             console.log("results", resultsDoc);
                                         }
                                         resolve();
-                                    })
-                                    .catch((err) => {
+                                    }
+                                    catch (err) {
                                         console.error(err);
                                         reject(err);
-                                    });
+                                    }
                                 }
                                 else {
                                     resolve();
                                 }
-                            })
-                            .catch((err) => {
+                            }
+                            catch(err) {
                                 console.error(err);
                                 reject(err);
-                            });
+                            };
                         }
                         else {
                             resolve();

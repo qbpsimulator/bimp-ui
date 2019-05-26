@@ -7,7 +7,7 @@ import * as Actions from '../actions'
 import { Helpers } from '../model-components/Helpers'
 
 
-const initialState = new qbp.ProcessSimulationInfoType();
+const initialState = {} as qbp.ProcessSimulationInfoType;
 
 type PotentialPayloads =
     Actions.ModelSimInfoLoadedPayload &
