@@ -429,7 +429,7 @@ export default class BPMNParser {
 
     private static getElementFriendlyName(element: Element): string {
         let baseName = (element.localName == "subProcess" ? "Sub-Process: " : "") + (element.getAttribute("name") ? element.getAttribute("name") : "N/A");
-        if (element.parentNode.localName == "subProcess") {
+        if ((element.parentNode as Element).localName == "subProcess") {
             baseName += " (" + BPMNParser.getParentSubProcessName(element) + ")";
         }
 

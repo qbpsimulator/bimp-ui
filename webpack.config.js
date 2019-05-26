@@ -15,18 +15,6 @@ module.exports = function (env) {
             new webpack.LoaderOptionsPlugin({
                 debug: false,
                 minimize: true,
-            }),
-            new webpack.optimize.UglifyJsPlugin({
-                beautify: false,
-                mangle: {
-                    screw_ie8: true,
-                    keep_fnames: true
-                },
-                compress: {
-                    screw_ie8: true
-                },
-                comments: false,
-                sourceMap: true
             })
         ];
     }
@@ -51,6 +39,7 @@ module.exports = function (env) {
 
         // Enable sourcemaps for debugging webpack's output.
         devtool: "source-map",
+        mode: isProduction ? "production" : "development",
 
         resolve: {
             // Add '.ts' and '.tsx' as resolvable extensions.
@@ -69,17 +58,17 @@ module.exports = function (env) {
                 {
                     test: /\.css$/,
                     use: [
-                    "style-loader",
-                    {
-                        loader: "css-loader",
-                        options: {
-                            modules: true,
-                            sourceMap: true,
-                            importLoaders: 1,
-                            localIdentName: "[name]--[local]--[hash:base64:8]"
-                        }
-                    },
-                    "postcss-loader" // has separate config, see postcss.config.js nearby
+                        "style-loader",
+                        {
+                            loader: "css-loader",
+                            options: {
+                                modules: true,
+                                sourceMap: true,
+                                importLoaders: 1,
+                                localIdentName: "[name]--[local]--[hash:base64:8]"
+                            }
+                        },
+                        "postcss-loader" // has separate config, see postcss.config.js nearby
                     ]
                 },
             ]
@@ -93,6 +82,9 @@ module.exports = function (env) {
         externals: {
             // "react": "React",
             // "react-dom": "ReactDOM"
+        },
+        optimization: {
+            minimize: isProduction
         },
         node: {
             fs: "empty",

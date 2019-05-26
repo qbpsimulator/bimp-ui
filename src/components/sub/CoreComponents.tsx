@@ -48,6 +48,7 @@ type OnChanged = ((value: string) => void);
 type ValidateCb = ((valu: string) => string);
 
 interface ValidateProps {
+    InputType: "Input" | "Dropdown",
     elementKey?: string;
     validators?: Array<ValidateCb>;
     value: string;
@@ -60,12 +61,12 @@ interface ValidateState {
     validators: Array<ValidateCb>;
 }
 
-export function ValidatedInput(props: any): ValidatedComponent {
-    return new ValidatedComponent(props, 'Input')
+export function ValidatedInput(props: any) {
+    return <ValidatedComponent {...props} InputType="Input" />;
 }
 
-export function ValidatedDropdown(props: any): ValidatedComponent {
-    return new ValidatedComponent(props, 'Dropdown')
+export function ValidatedDropdown(props: any) {
+    return <ValidatedComponent {...props} InputType="Dropdown" />;
 }
 
 export abstract class ValidateMeComponent<P, S> extends React.PureComponent<P, S>
@@ -98,14 +99,11 @@ class ValidatedComponent
     implements ValidateMe  {
 
     private _value: string;
-    private _inputType: string;
     private _focused: boolean = false;
     private _changeDispatched: boolean = true;
 
-    constructor(props: ValidateProps & any, inputType = 'Input') {
+    constructor(props: ValidateProps & any) {
         super(props);
-
-        this._inputType = inputType
 
         let validators = new Array<ValidateCb>();
         if (props.required) {
@@ -121,6 +119,12 @@ class ValidatedComponent
 
         this._value = props.value;
         this.state = { validators: validators };
+    }
+
+    componentDidUpdate(prevProps: ValidateProps) {
+        if (prevProps !== this.props) {
+            this.validate();
+        }
     }
 
     public getValue(): string {
@@ -145,7 +149,7 @@ class ValidatedComponent
         for (let i = 0; i < this.state.validators.length; ++i) {
             const errorStr = this.state.validators[i](this._value);
             if (!!errorStr) {
-                this.setState({...this.state, error: errorStr});
+                this.setState({ error: errorStr});
                 return errorStr;
             }
         }
@@ -186,10 +190,10 @@ class ValidatedComponent
     }
 
     render() {
-        const { elementKey, error, onBlur, onChange, value, onValidated, validators,
+        const { elementKey, error, onBlur, onChange, value, onValidated, validators, source, InputType,
             ...passThroughProps } = this.props;
 
-        switch (this._inputType) {
+        switch (InputType) {
             case 'Dropdown':
                 if (!!this.props.tooltip) {
                     return <TooltipDropdown
@@ -198,6 +202,7 @@ class ValidatedComponent
                         onBlur={this.onBlur}
                         onFocus={this.onFocus}
                         onChange={this.setValue}
+                        source={source}
                         value={this._value}
                         allowBlank={!passThroughProps.required}
                     />
@@ -209,6 +214,7 @@ class ValidatedComponent
                         onBlur={this.onBlur}
                         onFocus={this.onFocus}
                         onChange={this.setValue}
+                        source={source}
                         value={this._value}
                         allowBlank={!passThroughProps.required}
                     />

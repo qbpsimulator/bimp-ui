@@ -15,7 +15,7 @@ export default class BPMNDocumentConverter {
             if (resultElements.length == 0)
                 return;
 
-            const createChildAndAppendChildenFrom = (element: Element, childName: string, sources: NodeListOf<Element>) => {
+            const createChildAndAppendChildenFrom = (element: Element, childName: string, sources: HTMLCollectionOf<Element>) => {
                 const newElem = document.createElementNS(BPMNParser.BIMPAPI_URI, childName);
 
                 if (sources.length > 0) {

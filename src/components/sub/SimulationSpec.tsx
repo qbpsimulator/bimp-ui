@@ -69,7 +69,7 @@ export class SimulationSpec extends React.PureComponent<Props, State> {
                                             tooltip="Specifies the number of how many process instances will be created during the simulation. Positive integer should be used."
                                             onChange={(v) => this.onModelSimInfoChange('processInstances', parseFloat(v))}
                                             value={Helpers.s(simInfo.processInstances)}
-                                            validators={[(v) => Validate.between(v, 1, this.props.mxmlLog ? 10000 : 100000)]}
+                                            validators={[(v) => Validate.between(v, 1, this.props.mxmlLog ? 10000 : 10000000000)]}
                                             required
                                         />
                                     </td>

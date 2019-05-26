@@ -26,8 +26,6 @@ interface SequenceFlowProps extends Types.DispatchProps {
 
 class SequenceFlow extends React.PureComponent<SequenceFlowProps, undefined> {
 
-    private _inputRef: any;
-
     constructor(props: SequenceFlowProps) {
         super(props);
     }
@@ -39,20 +37,6 @@ class SequenceFlow extends React.PureComponent<SequenceFlowProps, undefined> {
 
         this.props.dispatch(Actions.updateSequenceFlowSimInfo(id, 'executionProbability', newVal));
     };
-
-    private setInputRef = (element: ValidateMe) => {
-        this._inputRef = element;
-    }
-
-    public invalidate() {
-        if (this._inputRef) {
-            this._inputRef.validate();
-        }
-    }
-
-    public getStringValue() {
-        return this._inputRef.getValue();
-    }
 
     public render() {
         const { flow, elementInfo } = this.props;
@@ -70,7 +54,6 @@ class SequenceFlow extends React.PureComponent<SequenceFlowProps, undefined> {
                                 <td className="second-column">
                                     <div>
                                         <ValidatedInput
-                                            ref={this.setInputRef}
                                             required
                                             type="number"
                                             value={probabilityStr}
@@ -94,44 +77,30 @@ class SequenceFlow extends React.PureComponent<SequenceFlowProps, undefined> {
 
 class Gateway extends React.PureComponent<GatewayProps, undefined> {
 
-    private _sequenceFlows = new Array<SequenceFlow>();
-
-    private _isInvalidating = false;
-    private validateGatewaySum = (value: string) => {
-        if (this.props.gateway.isInclusive)
-            return '';
-
-        let sum = 0;
-        this._sequenceFlows.forEach(flow => {
-            sum += parseFloat(flow.getStringValue());
-        });
-
-        const errorStr = Math.round(sum) == 100 ? '' : 'Sum of exclusive gateway probabilities must be equal to 100%';
-
-        // invalidate all other gateways as well
-        if (!this._isInvalidating) {
-            this._isInvalidating = true;
-            this._sequenceFlows.forEach(flow => flow.invalidate());
-            this._isInvalidating = false;
-        }
-
-        return errorStr;
-    };
-
-    private setSequenceFlowRef = (element: SequenceFlow) => {
-        this._sequenceFlows.push(element);
-    }
-
     public render() {
+        const validateGatewaySum = (value: string) => {
+            if (this.props.gateway.isInclusive)
+                return '';
+
+            let sum = 0;
+            const { sequenceFlows } = this.props;
+            sequenceFlows.forEach(flow => {
+                sum += flow.executionProbability * 100
+            });
+
+            const errorStr = Math.round(sum) == 100 ? '' : 'Sum of exclusive gateway probabilities must be equal to 100%';
+
+            return errorStr;
+        };
+
         const { gateway, sequenceFlows } = this.props;
             const flows = gateway.sequenceFlows.map(flow => {
                 return <SequenceFlow
                     key={flow.id}
-                    ref={this.setSequenceFlowRef}
                     flow={flow}
                     elementInfo={sequenceFlows.find(sf => sf.elementId === flow.id)}
                     dispatch={this.props.dispatch}
-                    gatewayValidator={this.validateGatewaySum}
+                    gatewayValidator={validateGatewaySum}
                     gatewayId={this.props.gateway.id}
                 />
             });
