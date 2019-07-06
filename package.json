@@ -9,7 +9,8 @@
     "start": "webpack-dev-server --progress --inline",
     "xsdgen": "java -jar node_modules/jsonix/lib/jsonix-schema-compiler-full.jar -d xmlns -p QBP QBPSchema.xsd && java -jar node_modules/jsonix/lib/jsonix-schema-compiler-full.jar -d xmlns -p QBPApi ApiSchema201212.xsd",
     "build:prod": "webpack --env=prod --progress --colors --profile",
-    "build:dev": "webpack --env=dev --progress --colors --profile"
+    "build:dev": "webpack --env=dev --progress --colors --profile",
+    "build": "gulp"
   },
   "keywords": [
     "BPMN",

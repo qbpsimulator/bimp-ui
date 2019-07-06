@@ -1,2 +1,2 @@
-npm install
-gulp
+npm ci
+npm run build
