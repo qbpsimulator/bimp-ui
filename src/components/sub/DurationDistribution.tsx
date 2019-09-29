@@ -5,7 +5,7 @@ import HistogramData from './HistogramData'
 import { TimeUnitDropdown, TooltipButton, ValidatedDropdown, ValidatedInput, ValidateMeComponent } from './CoreComponents'
 import { Helpers } from '../../model-components/Helpers'
 
-import { DistributionInfo, DistributionInfoHistogramDataBinsType} from '../../types'
+import { DistributionInfo, DistributionInfoHistogramDataBinsType, TimeUnitType, DistributionType} from '../../types'
 
 interface Props {
     showHistogram: boolean,
@@ -21,12 +21,12 @@ interface State {
     arg1: string;
 	arg2: string;
 	mean: string;
-	type: string;
-	timeUnit: string;
+	type: DistributionType;
+	timeUnit: TimeUnitType;
     histogramOpened: boolean;
 }
 
-const fieldInformation = {
+const fieldInformation: { } = {
     FIXED: {
         mean: 'to'
     },
@@ -70,18 +70,24 @@ const distributionTypes = [
 
 export class DurationDistribution extends ValidateMeComponent<Props, State> {
 
-    constructor (props: Props) {
+    constructor(props: Props) {
         super(props);
+        this.state = DurationDistribution.getDerivedStateFromProps(props, {} as any)
+    }
 
-        const di = props.distributionInfo;
-        this.state = {
-            arg1: this.fromSeconds(di.arg1),
-            arg2: this.fromSeconds(di.arg2),
-            mean: this.fromSeconds(di.mean),
-            type: di.type,
-            timeUnit: di.timeUnit,
-            histogramOpened: false
+    static getDerivedStateFromProps(nextProps: Props, prevState: State) {
+        const { arg1, arg2, mean, type, timeUnit } = nextProps.distributionInfo;
+        return {...prevState,
+            arg1: DurationDistribution.fromSeconds(arg1, timeUnit),
+            arg2: DurationDistribution.fromSeconds(arg2, timeUnit),
+            mean: DurationDistribution.fromSeconds(mean, timeUnit),
+            type,
+            timeUnit
         };
+    }
+
+    componentWillReceiveProps(nextProps: Props) {
+        this.setState(DurationDistribution.getDerivedStateFromProps(nextProps, this.state));
     }
 
     public getElementId(): string {
@@ -114,26 +120,20 @@ export class DurationDistribution extends ValidateMeComponent<Props, State> {
 
         this.setState({...this.state,
             [name]: value
+            },
+        () => {
+            const { arg1, arg2, mean, type, timeUnit } = this.state;
+            const newDi: DistributionInfo = {
+                ...this.props.distributionInfo,
+                arg1: DurationDistribution.toSeconds(parseFloat(arg1), timeUnit),
+                arg2: DurationDistribution.toSeconds(parseFloat(arg2), timeUnit),
+                mean: DurationDistribution.toSeconds(parseFloat(mean), timeUnit),
+                type,
+                timeUnit
+            };
+
+            this.props.onChange(newDi);
         });
-
-        let modelValue: number | string = value;
-        if (name === 'mean' || name ===  'arg1' || name ===  'arg2') {
-            modelValue = this.toSeconds(parseFloat(value));
-        }
-
-        const di = this.props.distributionInfo;
-        let newModelState = {
-            ...di,
-            [name]: modelValue,
-        };
-
-        if (name === 'timeUnit') {
-            newModelState.arg1 = this.toSeconds(di.arg1, newModelState.timeUnit);
-            newModelState.arg2 = this.toSeconds(di.arg2, newModelState.timeUnit);
-            newModelState.mean = this.toSeconds(di.mean, newModelState.timeUnit);
-        }
-
-        this.props.onChange(newModelState);
     };
 
 
@@ -149,9 +149,7 @@ export class DurationDistribution extends ValidateMeComponent<Props, State> {
         this.props.onChange(newModelState);
     }
 
-    private toSeconds(x: number, timeUnit: string = ''): number {
-        if (!timeUnit)
-            timeUnit = this.props.distributionInfo.timeUnit;
+    private static toSeconds(x: number, timeUnit: TimeUnitType): number {
         switch (timeUnit) {
             case 'seconds':
                 return x;
@@ -166,8 +164,8 @@ export class DurationDistribution extends ValidateMeComponent<Props, State> {
         return x;
     }
 
-    private fromSeconds(x: number): string {
-        switch (this.props.distributionInfo.timeUnit) {
+    private static fromSeconds(x: number, timeUnit: TimeUnitType): string {
+        switch (timeUnit) {
             case 'minutes':
                 x = Math.round(100 * x / 60) / 100;
                 break;
