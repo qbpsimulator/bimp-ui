@@ -230,7 +230,7 @@ export default class BPMNParser {
     private readTasks(): boolean {
         this._tasks = new Map<string, TaskType>();
         let documentElement = this._document.documentElement;
-        const nodes = documentElement.querySelectorAll('task, manualTask, userTask, scriptTask, serviceTask, sendTask, receiveTask, subProcess, callActivity');
+        const nodes = documentElement.querySelectorAll('task, manualTask, userTask, scriptTask, serviceTask, sendTask, receiveTask, subProcess, adHocSubProcess, callActivity');
         const list = Array.prototype.slice.call(nodes)
             .sort(BPMNParser.compareByParentIdAndNameFunc);
 
@@ -239,7 +239,7 @@ export default class BPMNParser {
                 return;
 
             let hasChildren = element.localName == 'callActivity' ||
-                (element.localName == 'subProcess' && (element.querySelector('outgoing') != null));
+                (['subProcess', 'adHocSubProcess'].indexOf(element.localName) >= 0) && (element.querySelector('outgoing') != null);
 
             const parentId = element.parentElement ? element.parentElement.getAttribute("id") : undefined
 
@@ -417,7 +417,7 @@ export default class BPMNParser {
     }
 
     private static getParentSubProcessName(element: Element): string {
-        if (element.parentElement.localName == "subProcess") {
+        if (['subProcess', 'adHocSubProcess'].indexOf(element.parentElement.localName) >= 0) {
             return "Sub-Process: " + (element.parentElement.getAttribute("name") ? element.parentElement.getAttribute("name") : "N/A");
         }
 
@@ -425,8 +425,10 @@ export default class BPMNParser {
     }
 
     private static getElementFriendlyName(element: Element): string {
-        let baseName = (element.localName == "subProcess" ? "Sub-Process: " : "") + (element.getAttribute("name") ? element.getAttribute("name") : "N/A");
-        if ((element.parentNode as Element).localName == "subProcess") {
+        const isSubProcess = (['subProcess', 'adHocSubProcess'].indexOf(element.localName) >= 0);
+        let baseName = (isSubProcess ? "Sub-Process: " : "") + (element.getAttribute("name") ? element.getAttribute("name") : "N/A");
+        const isParentSubProcess = (['subProcess', 'adHocSubProcess'].indexOf((element.parentNode as Element).localName) >= 0);
+        if (isParentSubProcess) {
             baseName += " (" + BPMNParser.getParentSubProcessName(element) + ")";
         }
 
