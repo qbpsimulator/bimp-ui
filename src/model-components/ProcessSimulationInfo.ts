@@ -53,11 +53,28 @@ export class ProcessSimulationInfo {
     }
 
     public static ensureDefaults(simInfo: Types.ProcessSimulationInfoType, parser: BPMNParser) {
+        this.ensureTypes(simInfo);
         this.ensureTimetables(simInfo);
         this.ensureResources(simInfo, parser);
         this.ensureCatchEvents(simInfo, parser.getCatchEvents());
         this.ensureGateways(simInfo, parser.getGateways());
         this.ensureTasks(simInfo, parser);
+    }
+
+    private static ensureTypes(simInfo: Types.ProcessSimulationInfoType) {
+        // parser may not parse empty arrays correctly
+        if (!Array.isArray(simInfo.timetables.timetable)) {
+            simInfo.timetables.timetable = [];
+        }
+        if (!Array.isArray(simInfo.resources.resource)) {
+            simInfo.resources.resource = [];
+        }
+        if (!Array.isArray(simInfo.elements.element)) {
+            simInfo.elements.element = [];
+        }
+        if (!Array.isArray(simInfo.sequenceFlows.sequenceFlow)) {
+            simInfo.sequenceFlows.sequenceFlow = [];
+        }
     }
 
     private static ensureTimetables(simInfo: Types.ProcessSimulationInfoType) {
