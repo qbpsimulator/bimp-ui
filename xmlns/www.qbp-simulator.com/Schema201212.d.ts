@@ -134,6 +134,11 @@ interface _ProcessSimulationInfoType extends BaseType {
 	/** List of all time tables that can be defined for
 	  * resources and process arrival rate. */
 	timetables?: ProcessSimulationInfoTypeTimetablesType;
+
+	statsOptions?: {
+		trimStartProcessInstances?: number;
+		trimEndProcessInstances?: number;
+	}
 }
 export interface ProcessSimulationInfoType extends _ProcessSimulationInfoType { constructor: { new(): ProcessSimulationInfoType }; }
 export var ProcessSimulationInfoType: { new(): ProcessSimulationInfoType };

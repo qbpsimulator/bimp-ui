@@ -121,6 +121,9 @@ export class Helpers {
             return '';
 
         if (typeof(input) == 'number') {
+            if (isNaN(input)) {
+                return "";
+            }
             return (Math.round(input * 100) / 100).toString();
         }
 
@@ -139,6 +142,19 @@ export class Helpers {
             return input;
 
         return NaN;
+    }
+
+    public static f(input: any): number {
+        const value = parseFloat(input);
+        if (isNaN(value)) {
+            return undefined;
+        }
+        if (typeof(input) === 'number') {
+            return input;
+        }
+
+
+        return value;
     }
 
     public static formatDuration(seconds: number | object, shortFormat: boolean = true): string  {

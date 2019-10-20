@@ -61,28 +61,6 @@ var QBPApi_Module_Factory = function () {
             typeInfo: 'Double'
           }]
       }, {
-        localName: 'StartSimulationRequest',
-        typeName: null,
-        propertyInfos: [{
-            name: 'modelData',
-            required: true,
-            collection: true
-          }, {
-            name: 'version',
-            typeInfo: 'Float',
-            attributeName: {
-              localPart: 'version'
-            },
-            type: 'attribute'
-          }, {
-            name: 'generateMXML',
-            typeInfo: 'Boolean',
-            attributeName: {
-              localPart: 'generateMXML'
-            },
-            type: 'attribute'
-          }]
-      }, {
         localName: 'ElementKPIType',
         propertyInfos: [{
             name: 'duration',
@@ -153,6 +131,28 @@ var QBPApi_Module_Factory = function () {
             type: 'attribute'
           }]
       }, {
+        localName: 'StartSimulationRequest',
+        typeName: null,
+        propertyInfos: [{
+            name: 'modelData',
+            required: true,
+            collection: true
+          }, {
+            name: 'version',
+            typeInfo: 'Float',
+            attributeName: {
+              localPart: 'version'
+            },
+            type: 'attribute'
+          }, {
+            name: 'generateMXML',
+            typeInfo: 'Boolean',
+            attributeName: {
+              localPart: 'generateMXML'
+            },
+            type: 'attribute'
+          }]
+      }, {
         localName: 'StatsValueType',
         propertyInfos: [{
             name: 'min',
@@ -193,6 +193,37 @@ var QBPApi_Module_Factory = function () {
         typeName: null,
         baseTypeInfo: '.SimulationKPIType'
       }, {
+        localName: 'SimulationStatusType',
+        propertyInfos: [{
+            name: 'errorDetails'
+          }, {
+            name: 'status',
+            attributeName: {
+              localPart: 'status'
+            },
+            type: 'attribute'
+          }, {
+            name: 'error',
+            attributeName: {
+              localPart: 'error'
+            },
+            type: 'attribute'
+          }, {
+            name: 'completed',
+            typeInfo: 'Int',
+            attributeName: {
+              localPart: 'completed'
+            },
+            type: 'attribute'
+          }, {
+            name: 'total',
+            typeInfo: 'Int',
+            attributeName: {
+              localPart: 'total'
+            },
+            type: 'attribute'
+          }]
+      }, {
         localName: 'ResourceKPIType',
         propertyInfos: [{
             name: 'utilization',
@@ -225,35 +256,6 @@ var QBPApi_Module_Factory = function () {
             minOccurs: 0,
             collection: true,
             typeInfo: '.ResourceKPIType'
-          }]
-      }, {
-        localName: 'SimulationStatusType',
-        propertyInfos: [{
-            name: 'errorCode'
-          }, {
-            name: 'errorMessage'
-          }, {
-            name: 'errorDetails'
-          }, {
-            name: 'status',
-            attributeName: {
-              localPart: 'status'
-            },
-            type: 'attribute'
-          }, {
-            name: 'completed',
-            typeInfo: 'Int',
-            attributeName: {
-              localPart: 'completed'
-            },
-            type: 'attribute'
-          }, {
-            name: 'total',
-            typeInfo: 'Int',
-            attributeName: {
-              localPart: 'total'
-            },
-            type: 'attribute'
           }]
       }, {
         localName: 'ProcessKPIType',
@@ -362,6 +364,10 @@ var QBPApi_Module_Factory = function () {
         type: 'enumInfo',
         localName: 'SimulationStatus',
         values: ['QUEUED', 'RUNNING', 'FAILED', 'FINALIZING', 'COMPLETED']
+      }, {
+        type: 'enumInfo',
+        localName: 'SimulationError',
+        values: ['INVALID_INPUT', 'SIMULATION_ERROR', 'IO_ERROR']
       }],
     elementInfos: [{
         elementName: 'SimulationSimulatorStatsResponse',

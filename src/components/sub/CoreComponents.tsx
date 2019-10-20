@@ -13,7 +13,7 @@ import * as Actions from '../../actions/ActionType'
 import { store } from '../../store'
 
 export const TooltipButton = onlyUpdateForKeys([])(Tooltip(Button))
-export const TooltipCheckbox = onlyUpdateForKeys(['checked', 'error'])(Tooltip(Checkbox))
+export const TooltipCheckbox = onlyUpdateForKeys(['checked', 'error', 'disabled'])(Tooltip(Checkbox))
 export const TooltipDropdown = onlyUpdateForKeys(['value', 'error', 'source', 'required'])(Tooltip(Dropdown))
 export const TooltipInput = onlyUpdateForKeys(['value', 'error', 'required'])(Tooltip(Input))
 export const TooltipDatePicker = onlyUpdateForKeys(['value', 'error'])(Tooltip(DatePicker));

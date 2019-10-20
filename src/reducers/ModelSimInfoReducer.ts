@@ -28,7 +28,18 @@ export const ModelSimInfoReducer: Reducer<qbp.ProcessSimulationInfoType> =
             return action.payload.parser.getQbpSimulationInfo();
 
         case Actions.Action_Model_SimInfoPropertyUpdated:
-            return {...state, [action.payload.key]: action.payload.value }
+            let key = action.payload.key;
+            let value = action.payload.value;
+
+            if (action.payload.key.indexOf(".") >= 0) {
+                const keys = action.payload.key.split(".");
+
+                key = keys[0];
+                value = state[key] ? {...state[key] } : {}
+                value[keys[1]] = action.payload.value;
+            }
+
+            return {...state, [key]: value }
 
         case Actions.Action_Model_ElementSimInfoPropertyUpdated:
             const newElement = state.elements.element.map(

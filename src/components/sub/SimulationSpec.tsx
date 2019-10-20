@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { ValidatedInput, TooltipDatePicker, TooltipTimePicker} from './CoreComponents'
+import { ValidatedInput, TooltipDatePicker, TooltipTimePicker, TooltipCheckbox} from './CoreComponents'
 import { Validate } from '../../model-components/Validator'
 
 import { DispatchProps, ProcessSimulationInfoType, DistributionInfo } from '../../types'
@@ -15,17 +15,23 @@ interface Props extends DispatchProps {
 }
 
 interface State {
+    trimStatsSame: boolean;
 }
 
 const initialState: State = {
+    trimStatsSame: true
 }
 
 export class SimulationSpec extends React.PureComponent<Props, State> {
 
     constructor (props: Props) {
         super(props);
+        const { modelSimInfo } = props;
 
-        this.state = initialState;
+        this.state = {...initialState,
+            trimStatsSame: modelSimInfo.statsOptions &&
+            modelSimInfo.statsOptions.trimStartProcessInstances === modelSimInfo.statsOptions.trimEndProcessInstances
+        };
     }
 
     onModelSimInfoChange = (name: string, value: string | number) => {
@@ -63,7 +69,7 @@ export class SimulationSpec extends React.PureComponent<Props, State> {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={2}>
+                                    <td>
                                         <ValidatedInput type="number"
                                             label="Total number of process instances"
                                             tooltip="Specifies the number of how many process instances will be created during the simulation. Positive integer should be used."
@@ -73,7 +79,31 @@ export class SimulationSpec extends React.PureComponent<Props, State> {
                                             required
                                         />
                                     </td>
-
+                                    <td className="StatsOptions">
+                                        <ValidatedInput type="number"
+                                            label="% to exclude from stats"
+                                            tooltip="Specifies the percentage of process instance performance stats to exclude from the start and the end of the simulation scenario. Use to exclude statistics from process instances when simulation scenario is 'warming up' or 'cooling down'."
+                                            onChange={(v) => this.handleTrimInfoChange('statsOptions.trimStartProcessInstances', v)}
+                                            value={Helpers.s(simInfo.statsOptions.trimStartProcessInstances * 100)}
+                                            validators={[(v) => v && Validate.between(v, 0, 40)]}
+                                        />
+                                        {!this.state.trimStatsSame &&
+                                            <ValidatedInput type="number"
+                                                label="% to exclude at the end"
+                                                tooltip="Specifies the percentage of process instance performance stats to exclude at the end of the simulation scenario."
+                                                onChange={(v) => this.handleTrimInfoChange('statsOptions.trimEndProcessInstances', v)}
+                                                value={Helpers.s(simInfo.statsOptions.trimEndProcessInstances * 100)}
+                                                validators={[(v) => v && Validate.between(v, 0, 40)]}
+                                            />
+                                        }
+                                        <TooltipCheckbox
+                                            checked={this.state.trimStatsSame}
+                                            disabled={Helpers.s(simInfo.statsOptions.trimStartProcessInstances) === ""}
+                                            label="Use the same % for tail"
+                                            onChange={this.handleTrimSameChange}
+                                            tooltip="If checked, then the same percentage of process instance performance stats is excluded at the end of the scenario."
+                                        />
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td colSpan={2}>
@@ -111,5 +141,26 @@ export class SimulationSpec extends React.PureComponent<Props, State> {
                 </div>
             </div>
         );
+    }
+
+    private handleTrimSameChange = () => {
+        if (this.state.trimStatsSame) {
+            const fromVal = this.props.modelSimInfo.statsOptions && this.props.modelSimInfo.statsOptions.trimStartProcessInstances || 0;
+            this.onModelSimInfoChange('statsOptions.toProcessInstance', fromVal);
+        }
+
+        this.setState((state) => ({...state, trimStatsSame: !state.trimStatsSame}));
+    }
+
+    private handleTrimInfoChange = (field: string, value: any) => {
+        const { trimStatsSame } = this.state;
+
+        const val = Helpers.f(parseFloat(value) / 100);
+        this.onModelSimInfoChange(field, val);
+
+        if (trimStatsSame) {
+            const otherField = field === 'statsOptions.trimEndProcessInstances' ? 'statsOptions.trimStartProcessInstances' : 'statsOptions.trimEndProcessInstances';
+            this.onModelSimInfoChange(otherField, val);
+        }
     }
 }

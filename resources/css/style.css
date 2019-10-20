@@ -344,3 +344,18 @@ float: right;
 a[disabled] {
     pointer-events: none;
 }
+
+.StatsOptions {
+    display: flex;
+}
+
+.StatsOptions > * {
+    margin-top: auto;
+    margin-bottom: auto !important;
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
+.form {
+   width: 100%
+}

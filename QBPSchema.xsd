@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema targetNamespace="http://www.qbp-simulator.com/Schema201212" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:qbp="http://www.qbp-simulator.com/Schema201212">
+<schema
+    targetNamespace="http://www.qbp-simulator.com/Schema201212"
+    elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
+    xmlns:qbp="http://www.qbp-simulator.com/Schema201212">
     <annotation>
-        <documentation>Defines the schema of simulation related information that is needed to simulate the business process model </documentation></annotation>
+        <documentation>Defines the schema of simulation related information
+            that is needed to simulate the business process model </documentation>
+    </annotation>
     <complexType name="ProcessSimulationInfoType">
         <annotation>
             <documentation>
@@ -43,8 +48,8 @@
                 </annotation>
                 <complexType>
                     <sequence>
-                        <element name="resource" type="qbp:Resource"
-                            minOccurs="1" maxOccurs="unbounded">
+                        <element name="resource" type="qbp:Resource" minOccurs="1"
+                            maxOccurs="unbounded">
                         </element>
                     </sequence>
                 </complexType>
@@ -79,6 +84,12 @@
                         </element>
                     </sequence>
                 </complexType>
+            </element>
+            <element name="statsOptions" type="qbp:StatsOptionsType"
+                minOccurs="0" maxOccurs="1">
+                <annotation>
+                    <documentation>Options for calculating statistics</documentation>
+                </annotation>
             </element>
         </sequence>
         <attribute name="id" type="string" use="optional">
@@ -149,8 +160,8 @@
                 </annotation>
                 <complexType>
                     <sequence>
-                        <element name="resourceId" type="string"
-                            minOccurs="1" maxOccurs="1">
+                        <element name="resourceId" type="string" minOccurs="1"
+                            maxOccurs="1">
                             <annotation>
                                 <documentation>
                                     ID of the resource
@@ -160,9 +171,12 @@
                     </sequence>
                 </complexType>
             </element>
-            <element name="durationThresholdTimeUnit" minOccurs="0" maxOccurs="1">
+            <element name="durationThresholdTimeUnit" minOccurs="0"
+                maxOccurs="1">
                 <annotation>
-                    <documentation>Does not actually specify time unit - values must be given always in seconds. This is only for user interfaces to store the user selection.</documentation>
+                    <documentation>Does not actually specify time unit - values must be
+                        given always in seconds. This is only for user interfaces to store
+                        the user selection.</documentation>
                 </annotation>
                 <simpleType>
                     <restriction base="string">
@@ -172,7 +186,7 @@
                         <enumeration value="days"></enumeration>
                     </restriction>
                 </simpleType>
-            </element>            
+            </element>
         </sequence>
         <attribute name="id" type="string" use="optional">
             <annotation>
@@ -215,13 +229,17 @@
         </attribute>
         <attribute name="simulateAsTask" type="boolean">
             <annotation>
-                <documentation>If set for sub-processes, then child elements of sub-process will not be simulated. Duration will be determined from the sub-process distribution.</documentation>
-            </annotation></attribute>
+                <documentation>If set for sub-processes, then child elements of
+                    sub-process will not be simulated. Duration will be determined from
+                    the sub-process distribution.</documentation>
+            </annotation>
+        </attribute>
     </complexType>
 
     <complexType name="Resource">
         <annotation>
-            <documentation>A resouce that can be assigned to tasks</documentation>
+            <documentation>A resouce that can be assigned to tasks
+            </documentation>
         </annotation>
         <attribute name="id" type="ID" use="required">
             <annotation>
@@ -247,12 +265,16 @@
         </attribute>
         <attribute name="costPerHour" type="double">
             <annotation>
-                <documentation>Cost per hour for the resource. Used to calculate activity costs depending on duration.</documentation>
-            </annotation></attribute>
+                <documentation>Cost per hour for the resource. Used to calculate
+                    activity costs depending on duration.</documentation>
+            </annotation>
+        </attribute>
         <attribute name="timetableId" type="string">
             <annotation>
-                <documentation>Id of the time table that defines workdays and time for the resource</documentation>
-            </annotation></attribute>
+                <documentation>Id of the time table that defines workdays and time
+                    for the resource</documentation>
+            </annotation>
+        </attribute>
     </complexType>
 
     <complexType name="DistributionInfo">
@@ -264,8 +286,7 @@
             </documentation>
         </annotation>
         <sequence>
-            <element name="histogramDataBins" minOccurs="0"
-                maxOccurs="1">
+            <element name="histogramDataBins" minOccurs="0" maxOccurs="1">
                 <annotation>
                     <documentation>
                         List of histogram bins to define distributions
@@ -290,7 +311,9 @@
             </element>
             <element name="timeUnit" minOccurs="0" maxOccurs="1">
                 <annotation>
-                    <documentation>Does not actually specify time unit - values must be given always in seconds. This is only for user interfaces to store the user selection.</documentation>
+                    <documentation>Does not actually specify time unit - values must be
+                        given always in seconds. This is only for user interfaces to store
+                        the user selection.</documentation>
                 </annotation>
                 <simpleType>
                     <restriction base="string">
@@ -368,7 +391,7 @@
             <enumeration value="SATURDAY"></enumeration>
             <enumeration value="SUNDAY"></enumeration>
         </restriction>
-    </simpleType>    
+    </simpleType>
 
     <complexType name="TimeTable">
         <annotation>
@@ -399,7 +422,8 @@
         <attribute name="id" type="ID" use="required">
             <annotation>
                 <documentation>Unique Id of the time table</documentation>
-            </annotation></attribute>
+            </annotation>
+        </attribute>
         <attribute name="default" type="boolean">
             <annotation>
                 <documentation>
@@ -411,7 +435,8 @@
         <attribute name="name" type="string" use="optional">
             <annotation>
                 <documentation>Friendly name of the time table</documentation>
-            </annotation></attribute>
+            </annotation>
+        </attribute>
     </complexType>
 
     <complexType name="TimeTableRule">
@@ -440,10 +465,13 @@
                 </documentation>
             </annotation>
         </attribute>
-        <attribute name="toWeekDay" type="qbp:WeekDay" use="optional">
+        <attribute name="toWeekDay" type="qbp:WeekDay"
+            use="optional">
             <annotation>
-                <documentation>Day until this time table rule applies</documentation>
-            </annotation></attribute>
+                <documentation>Day until this time table rule applies
+                </documentation>
+            </annotation>
+        </attribute>
     </complexType>
 
 
@@ -451,7 +479,8 @@
 
     <element name="processSimulationInfo">
         <annotation>
-            <documentation>Root node that contains simulation information/scenario</documentation>
+            <documentation>Root node that contains simulation
+                information/scenario</documentation>
         </annotation>
         <complexType>
             <complexContent>
@@ -460,17 +489,20 @@
         </complexType>
     </element>
 
-    <complexType name="SequenceFlowSimulationInfoType">     
+    <complexType name="SequenceFlowSimulationInfoType">
         <annotation>
             <documentation>Sequence flow simulation information</documentation>
         </annotation>
         <attribute name="elementId" type="string" use="required">
             <annotation>
-                <documentation>Id of the sequence flow element in BPMN file</documentation>
-            </annotation></attribute>
+                <documentation>Id of the sequence flow element in BPMN file
+                </documentation>
+            </annotation>
+        </attribute>
         <attribute name="executionProbability">
             <annotation>
-                <documentation>Probaility of executing the sequence flow. Used for XOR and OR gateways. Double value from 0 to 1.</documentation>
+                <documentation>Probaility of executing the sequence flow. Used for
+                    XOR and OR gateways. Double value from 0 to 1.</documentation>
             </annotation>
             <simpleType>
                 <restriction base="double">
@@ -488,18 +520,68 @@
             </documentation>
         </annotation>
         <sequence>
-            <element name="distribution" type="qbp:DistributionInfo" minOccurs="1" maxOccurs="1">
+            <element name="distribution" type="qbp:DistributionInfo"
+                minOccurs="1" maxOccurs="1">
                 <annotation>
-                    <documentation>Distribution to be used for this histogram bin</documentation>
-                </annotation></element>
+                    <documentation>Distribution to be used for this histogram bin
+                    </documentation>
+                </annotation>
+            </element>
         </sequence>
         <attribute name="probability" type="double">
             <annotation>
                 <documentation>
                     Probability from 0 to 100 for the distribution from
-                    this histogram bin to be used. Sum of "probability" values of items in parent collection must be equal to 100.
+                    this histogram bin to be used. Sum of "probability" values of items in
+                    parent collection must be equal to 100.
                 </documentation>
             </annotation>
+        </attribute>
+    </complexType>
+
+    <complexType name="StatsOptionsType">
+        <annotation>
+            <documentation>
+                Options for calculating simulation statistics.
+            </documentation>
+        </annotation>
+        <attribute name="trimStartProcessInstances" use="optional">
+            <annotation>
+                <documentation>
+                    Number of process instances to trim from the start of the simulation
+                    scenario for performance statistics.
+                    If provided, then simulation performance
+                    statistics and logs exclude process instances before
+                    the provided value. The value must be between 0 and less than the
+                    number of process instances to simulate. If provided
+                    value is between 0 and 1, then it is handled as a
+                    percentage of the number of process instances.
+                </documentation>
+            </annotation>
+            <simpleType>
+                <restriction base="double">
+                    <minInclusive value="0"></minInclusive>
+                </restriction>
+            </simpleType>
+        </attribute>
+        <attribute name="trimEndProcessInstances" use="optional">
+            <annotation>
+                <documentation>Number of process instances to trim from the end of
+                    the simulation scenario for performance statistics.
+                    If provided, then simulation performance
+                    statistics and logs exclude provided process instances at the end of the
+                    simulation scenario.
+                    The value must be between 0 and less than the
+                    number of process instances to simulate. If provided
+                    value is between 0 and 1, then it is handled as a
+                    percentage of the number of process instances.
+                </documentation>
+            </annotation>
+            <simpleType>
+                <restriction base="double">
+                    <minExclusive value="0"></minExclusive>
+                </restriction>
+            </simpleType>
         </attribute>
     </complexType>
 </schema>

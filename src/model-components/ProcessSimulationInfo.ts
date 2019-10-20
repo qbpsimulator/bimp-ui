@@ -59,6 +59,9 @@ export class ProcessSimulationInfo {
         this.ensureCatchEvents(simInfo, parser.getCatchEvents());
         this.ensureGateways(simInfo, parser.getGateways());
         this.ensureTasks(simInfo, parser);
+        if (!simInfo.statsOptions) {
+            simInfo.statsOptions = {};
+        }
     }
 
     private static ensureTypes(simInfo: Types.ProcessSimulationInfoType) {
