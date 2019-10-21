@@ -26,7 +26,7 @@
   "author": "Madis Abel",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.16.2",
+    "axios": "^0.18.1",
     "bpmn-js": "^0.20.7",
     "dom-serialize": "^2.2.1",
     "fast-xml-parser": "^3.12.16",
