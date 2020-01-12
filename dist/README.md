@@ -187,8 +187,7 @@ QBP Business Process Simulator RESTful service API schema is defined in: ApiSche
 Schema definition files need to be generated when either of the schema is changed.
 
 This can be done by doing the following:
-- start webpack dev server with ```npm start```
-- run npm script: ```npm run xsdgen```
+run npm script: ```npm run xsdgen```
 
 
 License

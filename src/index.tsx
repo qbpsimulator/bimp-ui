@@ -54,8 +54,8 @@ export function init(containerId: string, config: Config = defaultConfig, initia
             <div id='react-root'>
                 <BrowserRouter>
                     <Switch>
-                        <Route path="*bpmnViewer.html" component={BPMNViewer}/>
-                        <Route path="*heatmapViewer.html" component={HeatmapViewer}/>
+                        <Route path="*bpmnViewer*" component={BPMNViewer}/>
+                        <Route path="*heatmapViewer*" component={HeatmapViewer}/>
                         <Route path="/" component={() => <MainAppWrapper config={config} initialFiles={initialFiles} />} />
                     </Switch>
                 </BrowserRouter>

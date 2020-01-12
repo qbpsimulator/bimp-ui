@@ -37,3 +37,24 @@ html, body, #root-container, #react-root, #bpmn-viewer, #bpmn-viewer-container {
 .bimp-heatmap-overlay-value {
   font-weight: bold;
 }
+
+.bpmn-viewer-root {
+  position: relative;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+
+.heatmap-legend {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.legend-color {
+  min-width: 70px;
+}
+
+.legend-value {
+  min-width: 80px;
+  text-align: right;
+}

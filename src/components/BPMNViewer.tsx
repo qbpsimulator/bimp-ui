@@ -1,6 +1,5 @@
 import * as React from 'react'
 
-import BPMNParser from '../model-components/BPMNParser'
 import { Helpers } from '../model-components/Helpers'
 import * as Types from '../types'
 
@@ -8,8 +7,9 @@ import { openAndFocusElementInOpenerWindow } from './BPMNViewerPage'
 import * as qbpapi from '../../xmlns/www.qbp-simulator.com/ApiSchema201212';
 
 
-const BpmnJs = require('bpmn-js');
-const Heatmap = require('heatmap.js')
+import Viewer from 'bpmn-js/lib/Viewer'
+import { CustomBPMNRendererModule, getHeatMapColorforValue } from  '../bpmn/CustomBPMNRenderer'
+import { HeatmapLegend } from './sub/HeatmapLegend';
 
 export type HeatmapType = 'waiting' | 'count' | 'cost' | 'duration';
 
@@ -20,46 +20,73 @@ export interface BPMNViewerProps {
     heatmapType?: HeatmapType;
 }
 
+interface State {}
+
 function wihtoutProcessId(id: string) {
     const p = id.lastIndexOf('.');
     return p > 0 ? id.substr(p + 1) : id;
 }
 
-export class BPMNViewer extends React.PureComponent<BPMNViewerProps, undefined> {
+export class BPMNViewer extends React.PureComponent<BPMNViewerProps, State> {
 
     private _container: HTMLDivElement;
     private _bpmnViewer = null;
-    private _heatmap: any;
-    private _viewerLoaded: boolean = false;
+    private elementCache = new Map<string, qbpapi.ElementKPIType>();
 
-    private onWindowSizeChanged = () => {
-        this.handleResize();
-    };
+    constructor(props: BPMNViewerProps) {
+        super(props);
+
+        this.calculateMaxHeat(props.heatmapType);
+    }
+
+    state: State = {}
 
     componentDidMount() {
-        this._bpmnViewer = new BpmnJs({ container: this._container });
+        this.cacheElementStats();
+        this.initViewer();
+    }
+
+    componentWillUpdate(nextProps: BPMNViewerProps) {
+        if (nextProps.heatmapType !== this.props.heatmapType) {
+            this.calculateMaxHeat(nextProps.heatmapType);
+        }
+    }
+
+    componentDidUpdate(prevProps: BPMNViewerProps) {
+        if (prevProps.heatmapType !== this.props.heatmapType) {
+            this.initViewer();
+        }
+    }
+
+    private initViewer() {
+        this._bpmnViewer = new Viewer({
+            container: this._container,
+            additionalModules: [
+                CustomBPMNRendererModule(this.getHeatRatioForElement)
+            ]
+        });
         this._bpmnViewer.importXML(this.props.app.activeParser.getFileContents(), (err) => {
             if (err) {
                 console.log('error rendering', err);
             } else {
-                this._viewerLoaded = true;
                 this.handleResize();
-                this.initHeatmap();
+                // this.initHeatmap();
                 this.applyNoSimInfoColorMarkers();
                 this.hookBpmnEvents();
                 console.log('BPMN viewer opened');
             }
         });
 
-        window.addEventListener('resize', this.onWindowSizeChanged, true);
+        const onWindowSizeChanged = () => {
+            this.handleResize();
+        };
+
+        window.addEventListener('resize', onWindowSizeChanged, true);
     }
 
     private handleResize() {
         const canvas = this._bpmnViewer.get("canvas");
         canvas.zoom("fit-viewport");
-
-        this.configureHeatmapSize();
-        this.generateHeatmapData();
     }
 
     private applyNoSimInfoColorMarkers() {
@@ -170,161 +197,96 @@ export class BPMNViewer extends React.PureComponent<BPMNViewerProps, undefined> 
         this._container = container;
     }
 
-    private _heatmapContainer: Element;
-    private initHeatmap() {
-        if (this.props.heatmapType === undefined)
+    cacheElementStats() {
+        this.elementCache.clear();
+        if (!this.props.simulation.results) {
             return;
-
-        if (!this._heatmap) {
-            //  Create heatmap
-
-            this._heatmapContainer = document.getElementsByClassName('djs-overlay-container').item(0);
-
-            this._heatmap = Heatmap.create({
-                container: this._heatmapContainer
-            });
         }
 
-        this.configureHeatmapSize();
-        this.generateHeatmapData();
-    }
-
-    private configureHeatmapSize() {
-        if (!this._heatmap)
+        if (!this.props.simulation.results.Results.elements && !this.props.simulation.results.Results.elements.element)
             return;
 
-        const canvas = this._bpmnViewer.get("canvas");
-        const viewport = canvas.viewbox();
-
-        this._heatmap.configure({
-            container: this._heatmapContainer,
-            width:  viewport.width + viewport.x,
-            height: viewport.height + viewport.y
+        const elements = this.props.simulation.results.Results.elements.element || [];
+        elements.forEach(el => {
+            this.elementCache.set(wihtoutProcessId(el.id), el);
         });
     }
 
     private getElementSimulationStats(elementOrId: any) {
+        if (!this.props.simulation.results)
+            return null;
+
         var element = null;
         var elements = this.props.simulation.results.Results.elements;
         if (typeof elementOrId === "object") {
             element = elementOrId;
         }
         else if (elements && elements.element) {
-            for (var i = 0; i < elements.element.length; ++i) {
-                const el = elements.element[i];
-                if (wihtoutProcessId(el.id) === elementOrId) {
-                    element = el;
-                    break;
-                }
-            }
+            return this.elementCache.get(elementOrId);
         }
         return element;
     }
 
-    private getHeatForElement(elementOrId: any): number | qbpapi.StatsValueType   {
+    private getStatsObjectForElement = (elementOrId: any, heatmapType: HeatmapType): Partial<qbpapi.StatsValueType> => {
         const element = this.getElementSimulationStats(elementOrId);
 
         if (element) {
-            if (this.props.heatmapType == "count")
-                return parseInt(element.count);
-            if (this.props.heatmapType == "cost")
+            if (heatmapType == "count")
+                return { average: parseInt(element.count) } as any;
+            if (heatmapType == "cost")
                 return element.cost;
-            if (this.props.heatmapType == "duration")
+            if (heatmapType == "duration")
                 return element.duration;
-            if (this.props.heatmapType == "waiting")
+            if (heatmapType == "waiting")
                 return element.waitingTime;
         }
 
-        return -1;
+        return null;
     }
 
-    private generateHeatmapData() {
-        if (!this._heatmap)
-            return;
+    private getAverageForElement = (elementOrId: any, heatmapType: HeatmapType): number | undefined => {
+        const obj = this.getStatsObjectForElement(elementOrId, heatmapType);
 
-        if (!this.props.simulation || !this.props.simulation.results)
-           return;
-
-        var heatmapData = [];
-        var maxVal = 0;
-
-        const elements = this.props.simulation.results.Results.elements;
-        const heatmapType = this.props.heatmapType;
-        if (elements && heatmapType) {
-            const elementRegistry = this._bpmnViewer.get('elementRegistry');
-            // Process elements from BIMP results
-            elements.element.forEach((element) => {
-                // Get shape for element ID
-                var shape = elementRegistry.get(wihtoutProcessId(element.id));
-                if (!shape)
-                    return;
-
-                // Read the KPI from results
-                var value = this.getHeatForElement(element);
-                if (typeof(value) == 'object') {
-                    value = (value as qbpapi.StatsValueType).average;
-                }
-
-                // Save the maximum value
-                if (value > maxVal)
-                    maxVal = value;
-
-                var overlayRadius = shape.height / 1.5;
-
-                // Add data to heatmap
-                heatmapData.push({
-                    x: shape.x + shape.width / 2,
-                    y: shape.y + shape.height / 2,
-                    value: value,
-                    radius: overlayRadius
-                });
-
-                // Add heat to incoming sequence flow from this element if it's not a gateway.
-                // If element is gateway then heat for incoming flow is defined by the heat of the previous element.
-                var isGateway = shape.incoming.length > 1;
-                var step = 4;
-                var pointRadius = 6;
-
-                if (heatmapType == "count") {
-                    shape.incoming.forEach((flowElement) => {
-                        if (!flowElement.waypoints)
-                            return;
-
-                        if (isGateway) {
-                            var source = flowElement.source;
-                            value = this.getHeatForElement(source.id);
-                        }
-
-                        for (var i = 1; i < flowElement.waypoints.length; ++i) {
-                            var x  = flowElement.waypoints[i].x - flowElement.waypoints[i-1].x;
-                            var y  = flowElement.waypoints[i].y - flowElement.waypoints[i-1].y;
-
-                            var c = Math.sqrt(x * x + y * y);
-                            var pointCount = Math.round(c / step) + 1;
-
-                            var dx = x / pointCount;
-                            var dy = y / pointCount;
-
-                            for (var j = (i == 1 ? 0 : 1); j <= pointCount; ++j) {
-                                var linePoint =
-                                {
-                                    x: flowElement.waypoints[i-1].x + j * dx,
-                                    y: flowElement.waypoints[i-1].y + j * dy,
-                                    value: value,
-                                    radius: pointRadius
-                                };
-                                heatmapData.push(linePoint);
-                            }
-                        }
-                    });
-                }
-            });
+        if (obj) {
+            return obj.average;
         }
 
-        this._heatmap.setData({
-            max: maxVal * 1.05,
-            data: heatmapData
-        });
+        return undefined;
+    }
+
+    private getHeatRatioForElement = (elementOrId: any): number | undefined => {
+        const heat = this.getAverageForElement(elementOrId, this.props.heatmapType);
+        if (typeof (heat) == "undefined") {
+            return undefined;
+        }
+
+        return heat / this.maxHeatValue;
+    }
+
+    private maxHeatValue: number = 0;
+    private calculateMaxHeat(heatmapType: HeatmapType) {
+        if (!this.props.simulation.results) {
+            return;
+        }
+
+        if (!heatmapType) {
+            return;
+        }
+
+        this.maxHeatValue = 0;
+        const elements = this.props.simulation.results.Results.elements;
+        if (elements && heatmapType) {
+            // Process elements from BIMP results
+            elements.element.forEach((element) => {
+                // Read the KPI from results
+                const value = this.getAverageForElement(element, heatmapType);
+                if (typeof(value) === 'undefined') {
+                    return;
+                }
+                // Save the maximum value
+                this.maxHeatValue = Math.max(this.maxHeatValue, value);
+            });
+        }
     }
 
     private formatHeatmapValue(value: number): string {
@@ -341,8 +303,8 @@ export class BPMNViewer extends React.PureComponent<BPMNViewerProps, undefined> 
     }
 
     private getOverlayForElement(elementId: string) {
-        const heat = this.getHeatForElement(elementId);
-        if (typeof(heat) == 'number' && heat < 0)
+        const heat = this.getStatsObjectForElement(elementId, this.props.heatmapType);
+        if (!heat)
             return null;
 
         const lines = [];
@@ -352,12 +314,11 @@ export class BPMNViewer extends React.PureComponent<BPMNViewerProps, undefined> 
         };
 
         if (this.props.heatmapType == 'count')
-            addLine(this.formatHeatmapValue(heat as number));
+            addLine(this.formatHeatmapValue(heat.average));
         else {
-            const heatStats = heat as qbpapi.StatsValueType;
-            addLine('Average: ' + this.formatHeatmapValue(heatStats.average));
-            addLine('Min: ' + this.formatHeatmapValue(heatStats.min));
-            addLine('Max: ' + this.formatHeatmapValue(heatStats.max));
+            addLine('Average: ' + this.formatHeatmapValue(heat.average));
+            addLine('Min: ' + this.formatHeatmapValue(heat.min));
+            addLine('Max: ' + this.formatHeatmapValue(heat.max));
         }
 
         return `
@@ -368,17 +329,24 @@ export class BPMNViewer extends React.PureComponent<BPMNViewerProps, undefined> 
         </div>`;
     }
 
-    shouldComponentUpdate(nextProps: BPMNViewerProps, state: undefined) {
+    shouldComponentUpdate(nextProps: BPMNViewerProps, state: State) {
         return nextProps.heatmapType !== this.props.heatmapType;
     }
 
     render() {
-        if (this._viewerLoaded) {
-            this.initHeatmap();
-        }
-        return <div
-            id='bpmn-viewer'
-            ref={this.setContainer}
-        />
+        return (
+            <div className='bpmn-viewer-root' key={Math.random()}>
+                <div
+                    id='bpmn-viewer'
+                    ref={this.setContainer}
+                />
+                {this.maxHeatValue !== undefined && this.props.heatmapType &&
+                    <HeatmapLegend key={this.props.heatmapType} getItem={(value: number) => ({
+                        color: getHeatMapColorforValue(value),
+                        value: this.formatHeatmapValue(Math.round(this.maxHeatValue * value)),
+                    })}/>
+                }
+            </div>
+        );
     }
 }
