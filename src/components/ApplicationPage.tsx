@@ -30,27 +30,25 @@ const mapStateToProps = (state: Types.StoreType) => ({
   currency: state.modelSimInfo.currency
 })
 class Application extends React.Component<Props & Types.DispatchProps, void> {
-    private timer: any;
+    private timeout: any;
 
     componentWillReceiveProps(nextProps: Props) {
         // new simulation, start timer
         if (nextProps.simulation && nextProps.simulation.id &&
                 (!this.props.simulation || nextProps.simulation.id !== this.props.simulation.id)) {
-            this.timer = setInterval(this.simulationTimer, 1000);
+            this.timeout = setTimeout(this.simulationTimer, 2000);
         }
 
-        if (!!this.timer && !!nextProps.simulation && !!nextProps.simulation.status &&
+        if (!!this.timeout && !!nextProps.simulation && !!nextProps.simulation.status &&
             (nextProps.simulation.status.status === 'COMPLETED' || nextProps.simulation.status.status === 'FAILED')) {
-            clearInterval(this.timer);
-            this.timer = null;
+            this.timeout = null;
         }
     }
 
     render() {
 
         return(
-            <div>
-                <h2 className="module-title">Online Simulator</h2>
+            <div className="bimp-page-container">
                 {this.props.app.page === "upload" &&
                     <UploadPage />
                 }
@@ -79,7 +77,12 @@ class Application extends React.Component<Props & Types.DispatchProps, void> {
 
         let rq = new RequestHandler();
 
-        rq.getSimulationStatus(simId);
+        rq.getSimulationStatus(simId)
+            .then(() => {
+                if (this.props.simulation.status.status !== 'COMPLETED' && this.props.simulation.status.status !== 'FAILED') {
+                    this.timeout = setTimeout(this.simulationTimer, 2000);
+                }
+            })
     }
 }
 

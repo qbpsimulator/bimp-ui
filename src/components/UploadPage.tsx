@@ -322,20 +322,8 @@ class UploadPage extends React.Component<Props & Types.DispatchProps, State> {
         return (
         <div id="uploadPage" className="contents">
             <div className="qbp-toppositions" id="top-model-area">
-                <div id="instructions" className="moduletable">
-                    <h3>Here are some instructions</h3>
-                    <br/>
-                    <ol>
-                        <li>Please select a valid BPMN 2.0 file, or more if you need process definitions from multiple files.</li>
-                        <li>Press <b className="blue">"Continue"</b> in order to add/change simulation information.</li>
-                        <li>Tick the <b className="blue">"Generate a log"</b> box if you want to be able to download simulation MXML log afterwards.</li>
-                        <li>Click <b className="blue">"Start simulation"</b>.</li>
-                        <li>Be amazed and wonder how such magic came to be.</li>
-                    </ol>
-                    <p>You can find a sample process model to try out <a href="http://fundamentals-of-bpm.org/wp-content/uploads/2013/11/ch7_CreditAppSimulation.bpmn_.zip">here</a>. Just unzip and upload the BPMN model!</p>
-                </div>
                 <div id="upload-area">
-                    <h3>Upload your .BPMN or .VSDX file</h3>
+                    <h3>Upload your .BPMN file</h3>
                     <br/>
                     <form id="upload">
                         <fieldset>
@@ -362,6 +350,17 @@ class UploadPage extends React.Component<Props & Types.DispatchProps, State> {
                         </fieldset>
                     </form>
                     <button className="button" id="continue-button" disabled={!this.state.loadedFiles} onClick={this.onContinueClicked}>Continue</button>
+                </div>
+                <div id="instructions" className="moduletable">
+                    <h3>Here are some instructions</h3>
+                    <br/>
+                    <ol>
+                        <li>Select a valid BPMN 2.0 file, or more if you need process definitions from multiple files.</li>
+                        <li>Press <b className="blue">"Continue"</b> in order to add/change simulation information.</li>
+                        <li>Tick the <b className="blue">"Generate a log"</b> box if you want to be able to download simulation MXML log afterwards.</li>
+                        <li>Click <b className="blue">"Start simulation"</b>.</li>
+                        <li>Be amazed and wonder how such magic came to be.</li>
+                    </ol>
                 </div>
             </div>
             <Snackbar

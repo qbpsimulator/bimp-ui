@@ -2,7 +2,13 @@ export interface Config {
     protocol: string;
     host: string;
     url: string
-    authtoken: string;
+    basicAuth?: {
+        username: string;
+        password: string;
+    };
+    jwtAuth?: {
+        token?: string;
+    }
     linkPrefix: string;
     errorStackApiKey: string;
 }

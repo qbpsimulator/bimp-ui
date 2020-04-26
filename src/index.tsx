@@ -18,10 +18,9 @@ const HeatmapViewer = () => <BPMNViewerPage showHeatmap={true}/>
 
 
 const defaultConfig: Config = {
-    protocol: "http://",
-    host: "www.qbp-simulator.com:8080",
-    url: "/qbp-simulator/rest/Simulation",
-    authtoken: "",
+    protocol: "https://",
+    host: "api.qbp-simulator.com",
+    url: "/rest/v1/Simulation",
     linkPrefix: "",
     errorStackApiKey: ""
 };

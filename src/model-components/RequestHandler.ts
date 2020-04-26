@@ -1,5 +1,5 @@
 import * as xmlbeautify from 'xml-beautifier';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 import { store } from '../store'
 
@@ -10,9 +10,7 @@ import BPMNParser from './BPMNParser'
 import QBPSerializer from './QBPSerializer'
 import { parseAsync } from '../XMLParser';
 
-
 export default class RequestHandler {
-    private _authToken: string;
     private _requestURL: string;
 
     private static _lastBpmnDocsData: Array<string>;
@@ -23,22 +21,35 @@ export default class RequestHandler {
 
     constructor() {
         this._requestURL = this.getBaseUrl();
-        this._authToken = store.getState().application.config.authtoken;
 
         axios.defaults.baseURL = this._requestURL;
+        axios.defaults.withCredentials = true;
     }
 
-    private getBaseUrl(includeAuthToken: boolean = false): string {
+    private getBaseUrl(): string {
         const config = store.getState().application.config;
         let str = config.protocol
-        if (includeAuthToken) {
-            str += atob(config.authtoken) + "@";
-        }
         str += config.host + config.url;
         return str;
     }
 
-    public startSimulation(modelData: Array<string>, generateMxml: boolean) {
+    private async ensureToken() {
+        const config = store.getState().application.config;
+
+        if (config.basicAuth) {
+            axios.defaults.headers = {
+                'Authorization': 'Basic ' + btoa(config.basicAuth.username + ":" + config.basicAuth.password),
+            }
+        }
+        else if (config.jwtAuth) {
+            const token = config.jwtAuth.token;
+            axios.defaults.headers = {
+                'Authorization': 'Bearer ' + token,
+            }
+        }
+    }
+
+    public async startSimulation(modelData: Array<string>, generateMxml: boolean) {
         RequestHandler._lastBpmnDocsData = modelData;
 
         modelData = modelData.map(s =>
@@ -58,13 +69,14 @@ export default class RequestHandler {
             console.log(xmlbeautify(reqData));
         }
 
+        await this.ensureToken();
+
         store.dispatch<any>({
             type: "START_SIMULATION",
             payload: axios({
                 method: 'post',
                 data: reqData,
                 headers: {
-                    'Authorization': 'Basic ' + this._authToken,
                     'Content-Type': 'application/xml; charset=utf-8'
                 }
             }),
@@ -82,124 +94,63 @@ export default class RequestHandler {
     }
 
     public getSimulationStatus(simulationId: string) {
-        store.dispatch<any>({
+        return store.dispatch<any>({
             type: "SIMULATION_STATUS",
             payload: axios({
-                url: '/' + simulationId,
-                method: 'get',
-                headers: {
-                    'Authorization': 'Basic ' + this._authToken,
-                }
+                url: simulationId,
+                method: 'get'
             })
         })
         .then(response => {
-            store.dispatch({
+            return store.dispatch({
                 type: "SIMULATION_STATUS_PARSE",
                 payload: parseAsync<qbpapi.document>(response.value.data)
             });
         });
     }
 
-    public getSimulationKPIs(simulationId: string) {
+    public getSimulationResults(simulationId: string) {
         store.dispatch<any>({
-            type: "SIMULATION_KPI",
+            type: "SIMULATION_RESULTS",
             payload: axios({
-                url: '/' + simulationId + '/KPI',
-                method: 'get',
-                headers: {
-                    'Authorization': 'Basic ' + this._authToken,
-                }
+                url: simulationId + '/Results',
+                method: 'get'
             })
         })
         .then(response => {
             store.dispatch({
-                type: "SIMULATION_KPI_PARSE",
+                type: "SIMULATION_RESULTS_PARSE",
                 payload: parseAsync<qbpapi.document>(response.value.data)
             });
         });
     }
 
-    public getProcessDurations(simulationId: string) {
-        store.dispatch<any>({
-            type: "SIMULATION_PROCESS_DURATION",
-            payload: axios({
-                url: '/' + simulationId + '/Distribution/ProcessDuration?bars=10',
-                method: 'get',
-                headers: {
-                    'Authorization': 'Basic ' + this._authToken,
-                }
-            })
-        })
-        .then(response => {
-            store.dispatch({
-                type: "SIMULATION_PROCESS_DURATION_PARSE",
-                payload: parseAsync<qbpapi.document>(response.value.data)
-            });
+    public async downloadSimulationResultsMxml(simulationId: string) {
+        const response = await axios({
+            url: simulationId + '/MXML',
+            method: 'get',
+            responseType: 'blob'
         });
+
+        this.initiateFileDownload(response, "simulation_logs.mxml.gz");
     }
 
-    public getProcessCycleTimes(simulationId: string) {
-        store.dispatch<any>({
-            type: "SIMULATION_PROCESS_CYCLETIME",
-            payload: axios({
-                url: '/' + simulationId + '/Distribution/CycleTime?bars=10',
-                method: 'get',
-                headers: {
-                    'Authorization': 'Basic ' + this._authToken,
-                }
-            })
-        })
-        .then(response => {
-            store.dispatch({
-                type: "SIMULATION_PROCESS_CYCLETIME_PARSE",
-                payload: parseAsync<qbpapi.document>(response.value.data)
-            });
+    public async downloadSimulationResultsCsv(simulationId: string) {
+        const response = await axios({
+            url: simulationId + '/CSV',
+            method: 'get',
+            responseType: 'blob'
         });
+
+        this.initiateFileDownload(response, "simulation_results.csv");
     }
 
-    public getProcessWaitingTimes(simulationId: string) {
-        store.dispatch<any>({
-            type: "SIMULATION_PROCESS_WAITINGTIME",
-            payload: axios({
-                url: '/' + simulationId + '/Distribution/ProcessWaitingTime?bars=10',
-                method: 'get',
-                headers: {
-                    'Authorization': 'Basic ' + this._authToken,
-                }
-            })
-        })
-        .then(response => {
-            store.dispatch({
-                type: "SIMULATION_PROCESS_WAITINGTIME_PARSE",
-                payload: parseAsync<qbpapi.document>(response.value.data)
-            });
-        });
-    }
-
-    public getProcessCosts(simulationId: string) {
-        store.dispatch<any>({
-            type: "SIMULATION_PROCESS_COST",
-            payload: axios({
-                url: '/' + simulationId + '/Distribution/ProcessCost?bars=10',
-                method: 'get',
-                headers: {
-                    'Authorization': 'Basic ' + this._authToken,
-                }
-            })
-        })
-        .then(response => {
-            store.dispatch({
-                type: "SIMULATION_PROCESS_COST_PARSE",
-                payload: parseAsync<qbpapi.document>(response.value.data)
-            });
-        });
-    }
-
-    public downloadSimulationResultsMxml(simulationId: string) {
-        window.open(this.getBaseUrl(true) + '/' + simulationId + '/MXML', '_blank');
-    }
-
-    public downloadSimulationResultsCsv(simulationId: string) {
-        window.open(this.getBaseUrl(true) + '/' + simulationId + '/CSV', '_blank');
+    private initiateFileDownload(response: AxiosResponse, fileName: string) {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
     }
 }

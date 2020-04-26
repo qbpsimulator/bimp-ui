@@ -116,9 +116,9 @@ class ScenarioPage extends React.Component<Props & Types.DispatchProps, State> {
                         onChange={v => this.onInputChange('mxmlLog', v)}
                         tooltip="Generates simulation logs in MXML format. Simulation takes much more time if selected. MXML is a format to store event logs using an XML-based syntax. The logs could be analyzed with other process mining tools."
                     />
-                    <div id="submit-button">
-                        <button id="startSimulationButton" onClick={this.onStartSimulationButtonClick} type="button" className="button">Start Simulation</button>
-                    </div>
+                </div>
+                <div id="submit-button">
+                    <button id="startSimulationButton" onClick={this.onStartSimulationButtonClick} type="button" className="button">Start Simulation</button>
                 </div>
             <br/>
             <div id="file-info"></div>

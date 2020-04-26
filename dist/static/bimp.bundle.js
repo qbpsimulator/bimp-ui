@@ -64,7 +64,7 @@ var Bimp =
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "b572ccb7465a798e496b";
+/******/ 	var hotCurrentHash = "209a96046c4c5e786f76";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -933,7 +933,6 @@ var buildURL = __webpack_require__(/*! ./../helpers/buildURL */ "./node_modules/
 var parseHeaders = __webpack_require__(/*! ./../helpers/parseHeaders */ "./node_modules/axios/lib/helpers/parseHeaders.js");
 var isURLSameOrigin = __webpack_require__(/*! ./../helpers/isURLSameOrigin */ "./node_modules/axios/lib/helpers/isURLSameOrigin.js");
 var createError = __webpack_require__(/*! ../core/createError */ "./node_modules/axios/lib/core/createError.js");
-var btoa = (typeof window !== 'undefined' && window.btoa && window.btoa.bind(window)) || __webpack_require__(/*! ./../helpers/btoa */ "./node_modules/axios/lib/helpers/btoa.js");
 
 module.exports = function xhrAdapter(config) {
   return new Promise(function dispatchXhrRequest(resolve, reject) {
@@ -945,22 +944,6 @@ module.exports = function xhrAdapter(config) {
     }
 
     var request = new XMLHttpRequest();
-    var loadEvent = 'onreadystatechange';
-    var xDomain = false;
-
-    // For IE 8/9 CORS support
-    // Only supports POST and GET calls and doesn't returns the response headers.
-    // DON'T do this for testing b/c XMLHttpRequest is mocked, not XDomainRequest.
-    if ( true &&
-        typeof window !== 'undefined' &&
-        window.XDomainRequest && !('withCredentials' in request) &&
-        !isURLSameOrigin(config.url)) {
-      request = new window.XDomainRequest();
-      loadEvent = 'onload';
-      xDomain = true;
-      request.onprogress = function handleProgress() {};
-      request.ontimeout = function handleTimeout() {};
-    }
 
     // HTTP basic authentication
     if (config.auth) {
@@ -975,8 +958,8 @@ module.exports = function xhrAdapter(config) {
     request.timeout = config.timeout;
 
     // Listen for ready state
-    request[loadEvent] = function handleLoad() {
-      if (!request || (request.readyState !== 4 && !xDomain)) {
+    request.onreadystatechange = function handleLoad() {
+      if (!request || request.readyState !== 4) {
         return;
       }
 
@@ -993,9 +976,8 @@ module.exports = function xhrAdapter(config) {
       var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
       var response = {
         data: responseData,
-        // IE sends 1223 instead of 204 (https://github.com/mzabriskie/axios/issues/201)
-        status: request.status === 1223 ? 204 : request.status,
-        statusText: request.status === 1223 ? 'No Content' : request.statusText,
+        status: request.status,
+        statusText: request.statusText,
         headers: responseHeaders,
         config: config,
         request: request
@@ -1304,8 +1286,6 @@ var defaults = __webpack_require__(/*! ./../defaults */ "./node_modules/axios/li
 var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
 var InterceptorManager = __webpack_require__(/*! ./InterceptorManager */ "./node_modules/axios/lib/core/InterceptorManager.js");
 var dispatchRequest = __webpack_require__(/*! ./dispatchRequest */ "./node_modules/axios/lib/core/dispatchRequest.js");
-var isAbsoluteURL = __webpack_require__(/*! ./../helpers/isAbsoluteURL */ "./node_modules/axios/lib/helpers/isAbsoluteURL.js");
-var combineURLs = __webpack_require__(/*! ./../helpers/combineURLs */ "./node_modules/axios/lib/helpers/combineURLs.js");
 
 /**
  * Create a new instance of Axios
@@ -1334,13 +1314,8 @@ Axios.prototype.request = function request(config) {
     }, arguments[1]);
   }
 
-  config = utils.merge(defaults, this.defaults, { method: 'get' }, config);
+  config = utils.merge(defaults, {method: 'get'}, this.defaults, config);
   config.method = config.method.toLowerCase();
-
-  // Support baseURL config
-  if (config.baseURL && !isAbsoluteURL(config.url)) {
-    config.url = combineURLs(config.baseURL, config.url);
-  }
 
   // Hook up interceptors middleware
   var chain = [dispatchRequest, undefined];
@@ -1496,6 +1471,8 @@ var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/util
 var transformData = __webpack_require__(/*! ./transformData */ "./node_modules/axios/lib/core/transformData.js");
 var isCancel = __webpack_require__(/*! ../cancel/isCancel */ "./node_modules/axios/lib/cancel/isCancel.js");
 var defaults = __webpack_require__(/*! ../defaults */ "./node_modules/axios/lib/defaults.js");
+var isAbsoluteURL = __webpack_require__(/*! ./../helpers/isAbsoluteURL */ "./node_modules/axios/lib/helpers/isAbsoluteURL.js");
+var combineURLs = __webpack_require__(/*! ./../helpers/combineURLs */ "./node_modules/axios/lib/helpers/combineURLs.js");
 
 /**
  * Throws a `Cancel` if cancellation has been requested.
@@ -1514,6 +1491,11 @@ function throwIfCancellationRequested(config) {
  */
 module.exports = function dispatchRequest(config) {
   throwIfCancellationRequested(config);
+
+  // Support baseURL config
+  if (config.baseURL && !isAbsoluteURL(config.url)) {
+    config.url = combineURLs(config.baseURL, config.url);
+  }
 
   // Ensure headers exist
   config.headers = config.headers || {};
@@ -1749,6 +1731,10 @@ var defaults = {
     return data;
   }],
 
+  /**
+   * A timeout in milliseconds to abort a request. If set to 0 (default) a
+   * timeout is not created.
+   */
   timeout: 0,
 
   xsrfCookieName: 'XSRF-TOKEN',
@@ -1804,54 +1790,6 @@ module.exports = function bind(fn, thisArg) {
 
 /***/ }),
 
-/***/ "./node_modules/axios/lib/helpers/btoa.js":
-/*!************************************************!*\
-  !*** ./node_modules/axios/lib/helpers/btoa.js ***!
-  \************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-// btoa polyfill for IE<10 courtesy https://github.com/davidchambers/Base64.js
-
-var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-
-function E() {
-  this.message = 'String contains an invalid character';
-}
-E.prototype = new Error;
-E.prototype.code = 5;
-E.prototype.name = 'InvalidCharacterError';
-
-function btoa(input) {
-  var str = String(input);
-  var output = '';
-  for (
-    // initialize result and counter
-    var block, charCode, idx = 0, map = chars;
-    // if the next str index does not exist:
-    //   change the mapping table to "="
-    //   check if d has no fractional digits
-    str.charAt(idx | 0) || (map = '=', idx % 1);
-    // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
-    output += map.charAt(63 & block >> 8 - idx % 1 * 8)
-  ) {
-    charCode = str.charCodeAt(idx += 3 / 4);
-    if (charCode > 0xFF) {
-      throw new E();
-    }
-    block = block << 8 | charCode;
-  }
-  return output;
-}
-
-module.exports = btoa;
-
-
-/***/ }),
-
 /***/ "./node_modules/axios/lib/helpers/buildURL.js":
 /*!****************************************************!*\
   !*** ./node_modules/axios/lib/helpers/buildURL.js ***!
@@ -1903,9 +1841,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
 
       if (utils.isArray(val)) {
         key = key + '[]';
-      }
-
-      if (!utils.isArray(val)) {
+      } else {
         val = [val];
       }
 
@@ -2165,6 +2101,15 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
 
 var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
 
+// Headers whose duplicates are ignored by node
+// c.f. https://nodejs.org/api/http.html#http_message_headers
+var ignoreDuplicateOf = [
+  'age', 'authorization', 'content-length', 'content-type', 'etag',
+  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
+  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
+  'referer', 'retry-after', 'user-agent'
+];
+
 /**
  * Parse headers into an object
  *
@@ -2192,7 +2137,14 @@ module.exports = function parseHeaders(headers) {
     val = utils.trim(line.substr(i + 1));
 
     if (key) {
-      parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
+      if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
+        return;
+      }
+      if (key === 'set-cookie') {
+        parsed[key] = (parsed[key] ? parsed[key] : []).concat([val]);
+      } else {
+        parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
+      }
     }
   });
 
@@ -2252,7 +2204,7 @@ module.exports = function spread(callback) {
 
 
 var bind = __webpack_require__(/*! ./helpers/bind */ "./node_modules/axios/lib/helpers/bind.js");
-var isBuffer = __webpack_require__(/*! is-buffer */ "./node_modules/is-buffer/index.js");
+var isBuffer = __webpack_require__(/*! is-buffer */ "./node_modules/axios/node_modules/is-buffer/index.js");
 
 /*global toString:true*/
 
@@ -2458,7 +2410,7 @@ function forEach(obj, fn) {
   }
 
   // Force an array if not already something iterable
-  if (typeof obj !== 'object' && !isArray(obj)) {
+  if (typeof obj !== 'object') {
     /*eslint no-param-reassign:0*/
     obj = [obj];
   }
@@ -2552,6 +2504,28 @@ module.exports = {
   extend: extend,
   trim: trim
 };
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/node_modules/is-buffer/index.js":
+/*!************************************************************!*\
+  !*** ./node_modules/axios/node_modules/is-buffer/index.js ***!
+  \************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+/*!
+ * Determine if an object is a Buffer
+ *
+ * @author   Feross Aboukhadijeh <https://feross.org>
+ * @license  MIT
+ */
+
+module.exports = function isBuffer (obj) {
+  return obj != null && obj.constructor != null &&
+    typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj)
+}
 
 
 /***/ }),
@@ -23437,38 +23411,6 @@ var invariant = function(condition, format, a, b, c, d, e, f) {
 };
 
 module.exports = invariant;
-
-
-/***/ }),
-
-/***/ "./node_modules/is-buffer/index.js":
-/*!*****************************************!*\
-  !*** ./node_modules/is-buffer/index.js ***!
-  \*****************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-/*!
- * Determine if an object is a Buffer
- *
- * @author   Feross Aboukhadijeh <https://feross.org>
- * @license  MIT
- */
-
-// The _isBuffer check is for Safari 5-7 support, because it's missing
-// Object.prototype.constructor. Remove this eventually
-module.exports = function (obj) {
-  return obj != null && (isBuffer(obj) || isSlowBuffer(obj) || !!obj._isBuffer)
-}
-
-function isBuffer (obj) {
-  return !!obj.constructor && typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj)
-}
-
-// For Node v0.10 support. Remove this eventually.
-function isSlowBuffer (obj) {
-  return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
-}
 
 
 /***/ }),
@@ -70945,7 +70887,7 @@ function fetchSimulationKPIsActor(state, dispatch) {
     if (isSimulationCompleted != hadSimulationCompleted) {
         if (isSimulationCompleted) {
             var rh = new RequestHandler_1.default();
-            rh.getSimulationKPIs(state.simulation.id);
+            rh.getSimulationResults(state.simulation.id);
         }
         hadSimulationCompleted = isSimulationCompleted;
     }
@@ -70958,13 +70900,6 @@ function fetchSimulationHistogramDataActor(state, dispatch) {
     if (hasSimulationKPIs != hadSimulationKPIs) {
         if (hasSimulationKPIs) {
             dispatch(Actions.setNewPage('results'));
-            if (state.simulation.id) {
-                var rh = new RequestHandler_1.default();
-                rh.getProcessDurations(state.simulation.id);
-                rh.getProcessCycleTimes(state.simulation.id);
-                rh.getProcessWaitingTimes(state.simulation.id);
-                rh.getProcessCosts(state.simulation.id);
-            }
         }
         hadSimulationKPIs = hasSimulationKPIs;
     }
@@ -71121,7 +71056,12 @@ var Application = /** @class */ (function (_super) {
             if (!simId)
                 return;
             var rq = new RequestHandler_1.default();
-            rq.getSimulationStatus(simId);
+            rq.getSimulationStatus(simId)
+                .then(function () {
+                if (_this.props.simulation.status.status !== 'COMPLETED' && _this.props.simulation.status.status !== 'FAILED') {
+                    _this.timeout = setTimeout(_this.simulationTimer, 2000);
+                }
+            });
         };
         return _this;
     }
@@ -71129,17 +71069,15 @@ var Application = /** @class */ (function (_super) {
         // new simulation, start timer
         if (nextProps.simulation && nextProps.simulation.id &&
             (!this.props.simulation || nextProps.simulation.id !== this.props.simulation.id)) {
-            this.timer = setInterval(this.simulationTimer, 1000);
+            this.timeout = setTimeout(this.simulationTimer, 2000);
         }
-        if (!!this.timer && !!nextProps.simulation && !!nextProps.simulation.status &&
+        if (!!this.timeout && !!nextProps.simulation && !!nextProps.simulation.status &&
             (nextProps.simulation.status.status === 'COMPLETED' || nextProps.simulation.status.status === 'FAILED')) {
-            clearInterval(this.timer);
-            this.timer = null;
+            this.timeout = null;
         }
     };
     Application.prototype.render = function () {
-        return (React.createElement("div", null,
-            React.createElement("h2", { className: "module-title" }, "Online Simulator"),
+        return (React.createElement("div", { className: "bimp-page-container" },
             this.props.app.page === "upload" &&
                 React.createElement(UploadPage_1.default, null),
             (this.props.app.page === "scenario" || this.props.app.page === "results") &&
@@ -71682,9 +71620,9 @@ var ScenarioPage = /** @class */ (function (_super) {
                     React.createElement(Gateways_1.Gateways, { sequenceFlows: this.props.modelSimInfo.sequenceFlows.sequenceFlow, gateways: parser.getGateways(), dispatch: this.props.dispatch }),
                     React.createElement(CatchEvents_1.CatchEvents, { elements: this.props.modelSimInfo.elements, catchEvents: parser.getCatchEvents(), dispatchElementSimInfoChange: this.props.dispatchElementSimInfoChange }))),
             React.createElement("div", { id: "sim-button-log-checkbox" },
-                React.createElement(CoreComponents_1.TooltipCheckbox, { checked: this.state.mxmlLog, label: "Generate a MXML log", onChange: function (v) { return _this.onInputChange('mxmlLog', v); }, tooltip: "Generates simulation logs in MXML format. Simulation takes much more time if selected. MXML is a format to store event logs using an XML-based syntax. The logs could be analyzed with other process mining tools." }),
-                React.createElement("div", { id: "submit-button" },
-                    React.createElement("button", { id: "startSimulationButton", onClick: this.onStartSimulationButtonClick, type: "button", className: "button" }, "Start Simulation"))),
+                React.createElement(CoreComponents_1.TooltipCheckbox, { checked: this.state.mxmlLog, label: "Generate a MXML log", onChange: function (v) { return _this.onInputChange('mxmlLog', v); }, tooltip: "Generates simulation logs in MXML format. Simulation takes much more time if selected. MXML is a format to store event logs using an XML-based syntax. The logs could be analyzed with other process mining tools." })),
+            React.createElement("div", { id: "submit-button" },
+                React.createElement("button", { id: "startSimulationButton", onClick: this.onStartSimulationButtonClick, type: "button", className: "button" }, "Start Simulation")),
             React.createElement("br", null),
             React.createElement("div", { id: "file-info" }),
             React.createElement(snackbar_1.default, { action: 'Dismiss', active: this.state.errorBarShowing, label: 'There appears to be a problem with simulation scenario. Please correct the errors: ' + firstError, timeout: 5000, onClick: this.handleErrorBarDismiss, onTimeout: this.handleErrorBarDismiss, type: 'cancel' }),
@@ -71927,7 +71865,7 @@ var SimulationResultsPage = /** @class */ (function (_super) {
             'hAxis.slantedText': false,
             'chartArea.left': 1,
             'chartArea.top': 1,
-            'colors': ['#3f51b5', '#3f51b5'],
+            'colors': ['#1D2951', '#1D2951'],
             'titleTextStyle': {
                 'color': '#5f5851'
             }
@@ -71980,7 +71918,7 @@ var SimulationResultsPage = /** @class */ (function (_super) {
             'hAxis.slantedText': false,
             'chartArea.left': 1,
             'chartArea.top': 1,
-            'colors': ['#3f51b5', '#3f51b5'],
+            'colors': ['#1D2951', '#1D2951'],
             'titleTextStyle': {
                 'color': '#5f5851'
             },
@@ -72298,30 +72236,8 @@ var UploadPage = /** @class */ (function (_super) {
             : null;
         return (React.createElement("div", { id: "uploadPage", className: "contents" },
             React.createElement("div", { className: "qbp-toppositions", id: "top-model-area" },
-                React.createElement("div", { id: "instructions", className: "moduletable" },
-                    React.createElement("h3", null, "Here are some instructions"),
-                    React.createElement("br", null),
-                    React.createElement("ol", null,
-                        React.createElement("li", null, "Please select a valid BPMN 2.0 file, or more if you need process definitions from multiple files."),
-                        React.createElement("li", null,
-                            "Press ",
-                            React.createElement("b", { className: "blue" }, "\"Continue\""),
-                            " in order to add/change simulation information."),
-                        React.createElement("li", null,
-                            "Tick the ",
-                            React.createElement("b", { className: "blue" }, "\"Generate a log\""),
-                            " box if you want to be able to download simulation MXML log afterwards."),
-                        React.createElement("li", null,
-                            "Click ",
-                            React.createElement("b", { className: "blue" }, "\"Start simulation\""),
-                            "."),
-                        React.createElement("li", null, "Be amazed and wonder how such magic came to be.")),
-                    React.createElement("p", null,
-                        "You can find a sample process model to try out ",
-                        React.createElement("a", { href: "http://fundamentals-of-bpm.org/wp-content/uploads/2013/11/ch7_CreditAppSimulation.bpmn_.zip" }, "here"),
-                        ". Just unzip and upload the BPMN model!")),
                 React.createElement("div", { id: "upload-area" },
-                    React.createElement("h3", null, "Upload your .BPMN or .VSDX file"),
+                    React.createElement("h3", null, "Upload your .BPMN file"),
                     React.createElement("br", null),
                     React.createElement("form", { id: "upload" },
                         React.createElement("fieldset", null,
@@ -72334,7 +72250,25 @@ var UploadPage = /** @class */ (function (_super) {
                             React.createElement("br", null),
                             loadedFiles,
                             this.state.loadedFiles.length > 1 && React.createElement(CoreComponents_1.TooltipDropdown, { source: loadedFilesDropdownSource, tooltip: "Select the BPMN file which is the main entry point to the simulation scenario.", label: "Simulation entry point", required: true, allowBlank: true, error: this.state.simulationEntryFilenameError, value: this.state.simulationEntryFilename, onChange: this.onSimulationEntryFilenameChanged }))),
-                    React.createElement("button", { className: "button", id: "continue-button", disabled: !this.state.loadedFiles, onClick: this.onContinueClicked }, "Continue"))),
+                    React.createElement("button", { className: "button", id: "continue-button", disabled: !this.state.loadedFiles, onClick: this.onContinueClicked }, "Continue")),
+                React.createElement("div", { id: "instructions", className: "moduletable" },
+                    React.createElement("h3", null, "Here are some instructions"),
+                    React.createElement("br", null),
+                    React.createElement("ol", null,
+                        React.createElement("li", null, "Select a valid BPMN 2.0 file, or more if you need process definitions from multiple files."),
+                        React.createElement("li", null,
+                            "Press ",
+                            React.createElement("b", { className: "blue" }, "\"Continue\""),
+                            " in order to add/change simulation information."),
+                        React.createElement("li", null,
+                            "Tick the ",
+                            React.createElement("b", { className: "blue" }, "\"Generate a log\""),
+                            " box if you want to be able to download simulation MXML log afterwards."),
+                        React.createElement("li", null,
+                            "Click ",
+                            React.createElement("b", { className: "blue" }, "\"Start simulation\""),
+                            "."),
+                        React.createElement("li", null, "Be amazed and wonder how such magic came to be.")))),
             React.createElement(snackbar_1.default, { action: 'Dismiss', active: this.state.errorBarShowing, 
                 //timeout={5000}
                 onClick: this.handleErrorBarDismiss, onTimeout: this.handleErrorBarDismiss, type: 'cancel' },
@@ -73958,10 +73892,9 @@ var ProcessSimulationInfo_1 = __webpack_require__(/*! ./model-components/Process
 var BPMNViewer = function () { return React.createElement(BPMNViewerPage_1.default, null); };
 var HeatmapViewer = function () { return React.createElement(BPMNViewerPage_1.default, { showHeatmap: true }); };
 var defaultConfig = {
-    protocol: "http://",
-    host: "www.qbp-simulator.com:8080",
-    url: "/qbp-simulator/rest/Simulation",
-    authtoken: "",
+    protocol: "https://",
+    host: "api.qbp-simulator.com",
+    url: "/rest/v1/Simulation",
     linkPrefix: "",
     errorStackApiKey: ""
 };
@@ -75081,6 +75014,41 @@ exports.default = QBPSerializer;
 
 "use strict";
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var xmlbeautify = __webpack_require__(/*! xml-beautifier */ "./node_modules/xml-beautifier/dist/index.js");
 var axios_1 = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
@@ -75092,172 +75060,159 @@ var XMLParser_1 = __webpack_require__(/*! ../XMLParser */ "./src/XMLParser.ts");
 var RequestHandler = /** @class */ (function () {
     function RequestHandler() {
         this._requestURL = this.getBaseUrl();
-        this._authToken = store_1.store.getState().application.config.authtoken;
         axios_1.default.defaults.baseURL = this._requestURL;
+        axios_1.default.defaults.withCredentials = true;
     }
     RequestHandler.getLastRequestData = function () {
         return this._lastBpmnDocsData;
     };
-    RequestHandler.prototype.getBaseUrl = function (includeAuthToken) {
-        if (includeAuthToken === void 0) { includeAuthToken = false; }
+    RequestHandler.prototype.getBaseUrl = function () {
         var config = store_1.store.getState().application.config;
         var str = config.protocol;
-        if (includeAuthToken) {
-            str += atob(config.authtoken) + "@";
-        }
         str += config.host + config.url;
         return str;
     };
-    RequestHandler.prototype.startSimulation = function (modelData, generateMxml) {
-        RequestHandler._lastBpmnDocsData = modelData;
-        modelData = modelData.map(function (s) {
-            return '<![CDATA[' + s.replace(/]]>/gi, ']]]]><![CDATA[>') + ']]>';
-        });
-        var request = {
-            'modelData': modelData,
-            'generateMXML': generateMxml,
-            'version': 1,
-        };
-        var serializer = new QBPSerializer_1.default(jsonixAPI.QBPApi);
-        var req = serializer.serializeToDomElement({ StartSimulationRequest: request }, '', BPMNParser_1.default.BIMPAPI_URI);
-        var reqData = new XMLSerializer().serializeToString(req);
-        if (true) {
-            console.log(xmlbeautify(reqData));
-        }
-        store_1.store.dispatch({
-            type: "START_SIMULATION",
-            payload: axios_1.default({
-                method: 'post',
-                data: reqData,
-                headers: {
-                    'Authorization': 'Basic ' + this._authToken,
-                    'Content-Type': 'application/xml; charset=utf-8'
+    RequestHandler.prototype.ensureToken = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var config, token;
+            return __generator(this, function (_a) {
+                config = store_1.store.getState().application.config;
+                if (config.basicAuth) {
+                    axios_1.default.defaults.headers = {
+                        'Authorization': 'Basic ' + btoa(config.basicAuth.username + ":" + config.basicAuth.password),
+                    };
                 }
-            }),
-            meta: {
-                generateMxml: generateMxml
-            }
-        })
-            .then(function (response) {
-            store_1.store.dispatch({
-                type: "START_SIMULATION_PARSE",
-                payload: XMLParser_1.parseAsync(response.value.data)
+                else if (config.jwtAuth) {
+                    token = config.jwtAuth.token;
+                    axios_1.default.defaults.headers = {
+                        'Authorization': 'Bearer ' + token,
+                    };
+                }
+                return [2 /*return*/];
+            });
+        });
+    };
+    RequestHandler.prototype.startSimulation = function (modelData, generateMxml) {
+        return __awaiter(this, void 0, void 0, function () {
+            var request, serializer, req, reqData;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        RequestHandler._lastBpmnDocsData = modelData;
+                        modelData = modelData.map(function (s) {
+                            return '<![CDATA[' + s.replace(/]]>/gi, ']]]]><![CDATA[>') + ']]>';
+                        });
+                        request = {
+                            'modelData': modelData,
+                            'generateMXML': generateMxml,
+                            'version': 1,
+                        };
+                        serializer = new QBPSerializer_1.default(jsonixAPI.QBPApi);
+                        req = serializer.serializeToDomElement({ StartSimulationRequest: request }, '', BPMNParser_1.default.BIMPAPI_URI);
+                        reqData = new XMLSerializer().serializeToString(req);
+                        if (true) {
+                            console.log(xmlbeautify(reqData));
+                        }
+                        return [4 /*yield*/, this.ensureToken()];
+                    case 1:
+                        _a.sent();
+                        store_1.store.dispatch({
+                            type: "START_SIMULATION",
+                            payload: axios_1.default({
+                                method: 'post',
+                                data: reqData,
+                                headers: {
+                                    'Content-Type': 'application/xml; charset=utf-8'
+                                }
+                            }),
+                            meta: {
+                                generateMxml: generateMxml
+                            }
+                        })
+                            .then(function (response) {
+                            store_1.store.dispatch({
+                                type: "START_SIMULATION_PARSE",
+                                payload: XMLParser_1.parseAsync(response.value.data)
+                            });
+                        });
+                        return [2 /*return*/];
+                }
             });
         });
     };
     RequestHandler.prototype.getSimulationStatus = function (simulationId) {
-        store_1.store.dispatch({
+        return store_1.store.dispatch({
             type: "SIMULATION_STATUS",
             payload: axios_1.default({
-                url: '/' + simulationId,
-                method: 'get',
-                headers: {
-                    'Authorization': 'Basic ' + this._authToken,
-                }
+                url: simulationId,
+                method: 'get'
             })
         })
             .then(function (response) {
-            store_1.store.dispatch({
+            return store_1.store.dispatch({
                 type: "SIMULATION_STATUS_PARSE",
                 payload: XMLParser_1.parseAsync(response.value.data)
             });
         });
     };
-    RequestHandler.prototype.getSimulationKPIs = function (simulationId) {
+    RequestHandler.prototype.getSimulationResults = function (simulationId) {
         store_1.store.dispatch({
-            type: "SIMULATION_KPI",
+            type: "SIMULATION_RESULTS",
             payload: axios_1.default({
-                url: '/' + simulationId + '/KPI',
-                method: 'get',
-                headers: {
-                    'Authorization': 'Basic ' + this._authToken,
-                }
+                url: simulationId + '/Results',
+                method: 'get'
             })
         })
             .then(function (response) {
             store_1.store.dispatch({
-                type: "SIMULATION_KPI_PARSE",
-                payload: XMLParser_1.parseAsync(response.value.data)
-            });
-        });
-    };
-    RequestHandler.prototype.getProcessDurations = function (simulationId) {
-        store_1.store.dispatch({
-            type: "SIMULATION_PROCESS_DURATION",
-            payload: axios_1.default({
-                url: '/' + simulationId + '/Distribution/ProcessDuration?bars=10',
-                method: 'get',
-                headers: {
-                    'Authorization': 'Basic ' + this._authToken,
-                }
-            })
-        })
-            .then(function (response) {
-            store_1.store.dispatch({
-                type: "SIMULATION_PROCESS_DURATION_PARSE",
-                payload: XMLParser_1.parseAsync(response.value.data)
-            });
-        });
-    };
-    RequestHandler.prototype.getProcessCycleTimes = function (simulationId) {
-        store_1.store.dispatch({
-            type: "SIMULATION_PROCESS_CYCLETIME",
-            payload: axios_1.default({
-                url: '/' + simulationId + '/Distribution/CycleTime?bars=10',
-                method: 'get',
-                headers: {
-                    'Authorization': 'Basic ' + this._authToken,
-                }
-            })
-        })
-            .then(function (response) {
-            store_1.store.dispatch({
-                type: "SIMULATION_PROCESS_CYCLETIME_PARSE",
-                payload: XMLParser_1.parseAsync(response.value.data)
-            });
-        });
-    };
-    RequestHandler.prototype.getProcessWaitingTimes = function (simulationId) {
-        store_1.store.dispatch({
-            type: "SIMULATION_PROCESS_WAITINGTIME",
-            payload: axios_1.default({
-                url: '/' + simulationId + '/Distribution/ProcessWaitingTime?bars=10',
-                method: 'get',
-                headers: {
-                    'Authorization': 'Basic ' + this._authToken,
-                }
-            })
-        })
-            .then(function (response) {
-            store_1.store.dispatch({
-                type: "SIMULATION_PROCESS_WAITINGTIME_PARSE",
-                payload: XMLParser_1.parseAsync(response.value.data)
-            });
-        });
-    };
-    RequestHandler.prototype.getProcessCosts = function (simulationId) {
-        store_1.store.dispatch({
-            type: "SIMULATION_PROCESS_COST",
-            payload: axios_1.default({
-                url: '/' + simulationId + '/Distribution/ProcessCost?bars=10',
-                method: 'get',
-                headers: {
-                    'Authorization': 'Basic ' + this._authToken,
-                }
-            })
-        })
-            .then(function (response) {
-            store_1.store.dispatch({
-                type: "SIMULATION_PROCESS_COST_PARSE",
+                type: "SIMULATION_RESULTS_PARSE",
                 payload: XMLParser_1.parseAsync(response.value.data)
             });
         });
     };
     RequestHandler.prototype.downloadSimulationResultsMxml = function (simulationId) {
-        window.open(this.getBaseUrl(true) + '/' + simulationId + '/MXML', '_blank');
+        return __awaiter(this, void 0, void 0, function () {
+            var response;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, axios_1.default({
+                            url: simulationId + '/MXML',
+                            method: 'get',
+                            responseType: 'blob'
+                        })];
+                    case 1:
+                        response = _a.sent();
+                        this.initiateFileDownload(response, "simulation_logs.mxml.gz");
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
     RequestHandler.prototype.downloadSimulationResultsCsv = function (simulationId) {
-        window.open(this.getBaseUrl(true) + '/' + simulationId + '/CSV', '_blank');
+        return __awaiter(this, void 0, void 0, function () {
+            var response;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, axios_1.default({
+                            url: simulationId + '/CSV',
+                            method: 'get',
+                            responseType: 'blob'
+                        })];
+                    case 1:
+                        response = _a.sent();
+                        this.initiateFileDownload(response, "simulation_results.csv");
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    RequestHandler.prototype.initiateFileDownload = function (response, fileName) {
+        var url = window.URL.createObjectURL(new Blob([response.data]));
+        var link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
     };
     return RequestHandler;
 }());
@@ -75647,27 +75602,17 @@ exports.SimulationReducer = function (state, action) {
         case "START_SIMULATION_PENDING":
             return __assign({}, state, { pending: true, error: null, status: null, results: null, mxmlRequested: !!action.meta.generateMxml });
         case "SIMULATION_STATUS_PENDING":
-        case "SIMULATION_KPI_PENDING":
             return __assign({}, state, { pending: true, error: null });
         case "START_SIMULATION_REJECTED":
         case "START_SIMULATION_PARSE_REJECTED":
         case "SIMULATION_STATUS_REJECTED":
         case "SIMULATION_STATUS_PARSE_REJECTED":
-        case "SIMULATION_KPI_REJECTED":
-        case "SIMULATION_KPI_PARSE_REJECTED":
-        case "SIMULATION_PROCESS_DURATION_REJECTED":
-        case "SIMULATION_PROCESS_DURATION_PARSE_REJECTED":
-        case "SIMULATION_PROCESS_CYCLETIME_REJECTED":
-        case "SIMULATION_PROCESS_CYCLETIME_PARSE_REJECTED":
-        case "SIMULATION_PROCESS_WAITINGTIME_REJECTED":
-        case "SIMULATION_PROCESS_WAITINGTIME_PARSE_REJECTED":
-        case "SIMULATION_PROCESS_COST_REJECTED":
-        case "SIMULATION_PROCESS_COST_PARSE_REJECTED":
+        case "SIMULATION_RESULTS_REJECTED":
+        case "SIMULATION_RESULTS_PARSE_REJECTED":
             console.error(action.payload);
             return __assign({}, state, { pending: false, error: action.payload });
         case "START_SIMULATION_FULFILLED":
         case "SIMULATION_STATUS_FULFILLED":
-        case "SIMULATION_KPI_FULFILLED":
             return __assign({}, state, { pending: false, error: null });
         case "START_SIMULATION_PARSE_FULFILLED":
             var startResponse = action.payload.StartSimulationResponse;
@@ -75675,30 +75620,8 @@ exports.SimulationReducer = function (state, action) {
         case "SIMULATION_STATUS_PARSE_FULFILLED":
             var statusResponse = action.payload.SimulationStatusResponse;
             return __assign({}, state, { status: statusResponse.status, error: null });
-        case "SIMULATION_KPI_PARSE_FULFILLED":
-            var kpiResponse = action.payload.SimulationKPIResponse;
-            var results = {};
-            results.Results = kpiResponse;
-            return __assign({}, state, { results: results, error: null });
-        case "SIMULATION_PROCESS_DURATION_PARSE_FULFILLED":
-        case "SIMULATION_PROCESS_CYCLETIME_PARSE_FULFILLED":
-        case "SIMULATION_PROCESS_WAITINGTIME_PARSE_FULFILLED":
-        case "SIMULATION_PROCESS_COST_PARSE_FULFILLED":
-            var distibutionResponse = action.payload.SimulationHistogramResponse;
-            var newResults = __assign({}, state.results);
-            if (action.type === "SIMULATION_PROCESS_DURATION_PARSE_FULFILLED") {
-                newResults.CycleTimesInTimetableData = distibutionResponse;
-            }
-            else if (action.type === "SIMULATION_PROCESS_CYCLETIME_PARSE_FULFILLED") {
-                newResults.CycleTimesData = distibutionResponse;
-            }
-            else if (action.type === "SIMULATION_PROCESS_WAITINGTIME_PARSE_FULFILLED") {
-                newResults.WaitingTimesData = distibutionResponse;
-            }
-            else if (action.type === "SIMULATION_PROCESS_COST_PARSE_FULFILLED") {
-                newResults.CostsData = distibutionResponse;
-            }
-            return __assign({}, state, { results: newResults });
+        case "SIMULATION_RESULTS_PARSE_FULFILLED":
+            return __assign({}, state, { results: action.payload.Results });
         case "SIMULATION_RESULTS_LOADED":
             return __assign({}, state, { results: action.payload });
         default:

@@ -214,7 +214,7 @@ export default class SimulationResultsPage extends React.Component<Props, State>
             'hAxis.slantedText': false,
             'chartArea.left': 1,
             'chartArea.top': 1,
-            'colors': ['#3f51b5', '#3f51b5'],
+            'colors': ['#1D2951', '#1D2951'],
             'titleTextStyle': {
                 'color': '#5f5851'
             }
@@ -286,7 +286,7 @@ export default class SimulationResultsPage extends React.Component<Props, State>
             'hAxis.slantedText': false,
             'chartArea.left': 1,
             'chartArea.top': 1,
-            'colors': ['#3f51b5', '#3f51b5'],
+            'colors': ['#1D2951', '#1D2951'],
             'titleTextStyle': {
                 'color': '#5f5851'
             },

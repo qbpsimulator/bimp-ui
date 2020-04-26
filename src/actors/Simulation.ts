@@ -10,7 +10,7 @@ export function fetchSimulationKPIsActor(state: StoreType, dispatch: Dispatch<St
     if (isSimulationCompleted != hadSimulationCompleted) {
         if (isSimulationCompleted) {
             const rh = new RequestHandler();
-            rh.getSimulationKPIs(state.simulation.id);
+            rh.getSimulationResults(state.simulation.id);
         }
 
         hadSimulationCompleted = isSimulationCompleted;
@@ -24,14 +24,6 @@ export function fetchSimulationHistogramDataActor(state: StoreType, dispatch: Di
     if (hasSimulationKPIs != hadSimulationKPIs) {
         if (hasSimulationKPIs) {
             dispatch(Actions.setNewPage('results'));
-
-            if (state.simulation.id) {
-                const rh = new RequestHandler();
-                rh.getProcessDurations(state.simulation.id);
-                rh.getProcessCycleTimes(state.simulation.id);
-                rh.getProcessWaitingTimes(state.simulation.id);
-                rh.getProcessCosts(state.simulation.id);
-            }
         }
 
         hadSimulationKPIs = hasSimulationKPIs;

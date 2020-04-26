@@ -3,9 +3,9 @@ BIMP-UI
 
 BIMP is a graphical user interface for [QBP Business Process Simulator](http://www.qbp-simulator.com) simulation service.
 
-BIMP provides a siplistic yet complete front end to:
+BIMP provides a simple yet complete front end user interface to:
 - Upload and parse business process models in standard BPMN 2.0 format
-- Collect simulation scenario specific data from user for the business prcessmodel
+- Collect simulation scenario specific data from user for the business process models
 - Run the simulation scenario
 - Show and visualize the simulation results e.g. waiting times, resource utilization and etc
 - Show a heatmap of process element weights based on several measures
@@ -14,7 +14,7 @@ BIMP provides a siplistic yet complete front end to:
 
 BIMP Backend / Access / Limitations
 ------------
-BIMP backend runs on QBP Business Process Simulator backend. BIMP by default uses limited account in the backend simulation service and large-scale simulatation cannot be conducted. Contact info@qbp-simulator.com for more information about full access.
+BIMP backend runs on QBP Business Process Simulator backend. BIMP by default uses limited account in the backend simulation service and large-scale simulation cannot be conducted. Contact info@qbp-simulator.com for more information about full access.
 
 Consuming BIMP
 ------------
@@ -31,7 +31,7 @@ gulp
 - See "Configuration options" for bimpConfig configuration object.
 
 
-Or you can use BIMP in npm packag. See notes below about a few manual dependencies that are needed.
+Or you can use BIMP in npm package. See notes below about a few manual dependencies that are needed.
 
 Install BIMP from npm:
 ```
@@ -56,7 +56,7 @@ Add CSS stylesheet to your site:
 <link href="./resources/css/style.css" rel="stylesheet" type="text/css" />
 ```
 
-Also, you need the following files to be included on your site (opened to launc BPMN viewer and heatmap):
+Also, you need the following files to be included on your site (opened to launch BPMN viewer and heatmap):
 example/heatmapViewer.html, example/bpmnViewer.html
 
 You can set the files to initialize Bimp with by passing in an argument to init function:
@@ -78,7 +78,7 @@ Bimp.init('root-container', bimpConfig, initialFiles);
 
 
 To get file contents back from Bimp then you can use the following function. First you can specify a boolean
-value in the first argument if you want to include simuation results as well or only scenario information:
+value in the first argument if you want to include simulation results as well or only scenario information:
 ```
 var files = Bimp.getUpdatedFiles(includeResults);
 files.forEach(f => {
@@ -88,11 +88,11 @@ files.forEach(f => {
 ```
 
 
-If you want to start start simulation programatically, then after BPMN files have been loaded, call:
+If you want to start start simulation programmatically, then after BPMN files have been loaded, call:
 ```
 Bimp.startSimulation(mxmlLog);
 ```
-The first parameters is a boolen indicating whether MXML logs should be created.
+The first parameters is a boolean indicating whether MXML logs should be created.
 
 
 
@@ -156,8 +156,16 @@ var bimpConfig = {
     host: "www.qbp-simulator.com:8080", // or: window.location.hostname + ":8080"
     // Path to the Simulation endpoint in the service
     url: "/qbp-simulator/rest/Simulation",
-    // Basic AUTH token. BASE64 encoded string containing: 'username:password'
-    authtoken: "",
+    // Credentials for basic auth, if applicable
+    basicAuth: {
+        username: "limited",
+        password: "limited"
+    },
+    // If Service supports token based auth and Bearer token, then provide it in the the jwtAuth key
+      //  jwtAuth: {
+      //    token: "JWT TOKEN TO BE PASSED TO THE SERVICE"
+      //  }
+
     // Relative path prefix to BPMN and Heatmap viewer files (bpmnViewer.html and heatmapViewer.html) to be opened when requested.
     linkPrefix: ""
 };
