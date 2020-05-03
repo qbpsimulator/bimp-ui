@@ -36,15 +36,15 @@ export default class RequestHandler {
     private async ensureToken() {
         const config = store.getState().application.config;
 
-        if (config.basicAuth) {
-            axios.defaults.headers = {
-                'Authorization': 'Basic ' + btoa(config.basicAuth.username + ":" + config.basicAuth.password),
-            }
-        }
-        else if (config.jwtAuth) {
+        if (config.jwtAuth) {
             const token = config.jwtAuth.token;
             axios.defaults.headers = {
                 'Authorization': 'Bearer ' + token,
+            }
+        }
+        else if (config.basicAuth) {
+            axios.defaults.headers = {
+                'Authorization': 'Basic ' + btoa(config.basicAuth.username + ":" + config.basicAuth.password),
             }
         }
     }
