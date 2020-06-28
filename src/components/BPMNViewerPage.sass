@@ -1,18 +1,24 @@
-html, body, #root-container, #react-root
-    display: flex
-    flex: 1 1 auto
+#react-root
     height: 100%
 
-#bpmn-viewer, #bpmn-viewer-container
+#bpmn-viewer-parent
+    display: flex
+    flex: 1 0 100%
+    height: 100%
+
+#bpmn-viewer-container
+    display: flex
     flex-direction: column
-    display: flex
-    flex: 1 1 auto
-    height: 100%
-
+    flex: 1 0 100%
+    width: 100%
 
 #bpmn-viewer-heatmap-header
     flex-direction: column
     display: flex
+
+#bpmn-viewer
+    flex: 1 0 100%
+    height: 100%
 
 .without-simulation-info:not(.djs-connection) .djs-visual > :nth-child(1)
     stroke: orange !important

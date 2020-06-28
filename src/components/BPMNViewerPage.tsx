@@ -78,27 +78,29 @@ class BPMNViewerPage extends React.PureComponent<BPMNViewerProps & Props, State>
     render() {
         const { showHeatmap, ...props } = this.props
         return (
-            <div id="bpmn-viewer-container" className="content">
-                <div id="bpmn-viewer-heatmap-header">
-                    <h2>{showHeatmap ? 'Heatmap' : 'BPMN Viewer'}</h2>
-                    {showHeatmap && (
-                        <div className="columns is-vcentered">
-                            <div className="column is-narrow">
-                                <p className="subtitle">Heatmap based on</p>
+            <div id="bpmn-viewer-parent">
+                <div id="bpmn-viewer-container" className="content section">
+                    <div id="bpmn-viewer-heatmap-header">
+                        <h2>{showHeatmap ? 'Heatmap' : 'BPMN Viewer'}</h2>
+                        {showHeatmap && (
+                            <div className="columns is-vcentered">
+                                <div className="column is-narrow">
+                                    <p className="subtitle">Heatmap based on</p>
+                                </div>
+                                <div className="column is-2">
+                                    <TooltipDropdown
+                                        fullWidth
+                                        source={heatmapTypes}
+                                        value={this.state.heatmapType}
+                                        onChange={(e) => this.onHeatmapTypeChanged(e.target.value as HeatmapType)}
+                                        tooltip="Select based on which results to show the heatmap"
+                                    />
+                                </div>
                             </div>
-                            <div className="column is-2">
-                                <TooltipDropdown
-                                    fullWidth
-                                    source={heatmapTypes}
-                                    value={this.state.heatmapType}
-                                    onChange={(e) => this.onHeatmapTypeChanged(e.target.value as HeatmapType)}
-                                    tooltip="Select based on which results to show the heatmap"
-                                />
-                            </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
+                    <BPMNViewer {...props} heatmapType={this.state.heatmapType} />
                 </div>
-                <BPMNViewer {...props} heatmapType={this.state.heatmapType} />
             </div>
         )
     }
