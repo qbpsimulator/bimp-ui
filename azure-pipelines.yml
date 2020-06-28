@@ -30,7 +30,7 @@ steps:
     - task: ArchiveFiles@2
       displayName: 'archive'
       inputs:
-          rootFolderOrFile: '.'
+          rootFolderOrFile: 'dist'
           includeRootFolder: true
           archiveType: 'zip'
           archiveFile: '$(Build.ArtifactStagingDirectory)/bimp-ui-$(Build.BuildId).zip'
