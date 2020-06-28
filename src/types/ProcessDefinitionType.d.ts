@@ -1,3 +1,3 @@
 export interface ProcessDefinitionType {
-    readonly id: string;
+    readonly id: string
 }

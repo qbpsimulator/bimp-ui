@@ -7,111 +7,100 @@ import { store } from '../store'
 import { BPMNViewer, BPMNViewerProps, HeatmapType } from './BPMNViewer'
 import { TooltipDropdown } from './sub/CoreComponents'
 
-const BIMP_MAIN_WINDOW_NAME = "BIMP-MAIN-WINDOW";
+const BIMP_MAIN_WINDOW_NAME = 'BIMP-MAIN-WINDOW'
+
+import './BPMNViewerPage.sass'
 
 function openNewWindow(targetName: string = '_blank', url: string): Window {
-    window.name = BIMP_MAIN_WINDOW_NAME;
-    return window.open(url, targetName,
-        'width=1000, location=no, menubar=no, status=no, resizable=yes, toolbar=no, scrollbars=yes');
+    window.name = BIMP_MAIN_WINDOW_NAME
+    return window.open(url, targetName, 'width=1000, location=no, menubar=no, status=no, resizable=yes, toolbar=no, scrollbars=yes')
 }
 
 export function openBpmnViewer(targetName: string = '_blank'): Window {
-    const linkPrefix = store.getState().application.config.linkPrefix || '';
+    const linkPrefix = store.getState().application.config.linkPrefix || ''
 
-    return openNewWindow(targetName, linkPrefix + 'bpmnViewer.html');
+    return openNewWindow(targetName, linkPrefix + 'bpmnViewer')
 }
 
 export function openHeatmapViewer(targetName: string = '_blank'): Window {
-    const linkPrefix = store.getState().application.config.linkPrefix || '';
-    return openNewWindow(targetName, linkPrefix + 'heatmapViewer.html');
+    const linkPrefix = store.getState().application.config.linkPrefix || ''
+    return openNewWindow(targetName, linkPrefix + 'heatmapViewer')
 }
 
 export function openAndFocusElementInOpenerWindow(elementId: string) {
-    const w = window.open("", BIMP_MAIN_WINDOW_NAME);
-    const element = w.document.getElementById(elementId);
+    const w = window.open('', BIMP_MAIN_WINDOW_NAME)
+    const element = w.document.getElementById(elementId)
     if (element) {
-        element.scrollIntoView(true);
+        element.scrollIntoView(true)
     }
 }
 
 const heatmapTypes = [
-    { value: 'waiting', label: 'Waiting times'},
-    { value: 'count', label: 'Counts'},
-    { value: 'cost', label: 'Costs'},
-    { value: 'duration', label: 'Durations'},
-    { value: '', label: 'None'},
-];
+    { value: 'waiting', label: 'Waiting times' },
+    { value: 'count', label: 'Counts' },
+    { value: 'cost', label: 'Costs' },
+    { value: 'duration', label: 'Durations' },
+    { value: '', label: 'None' }
+]
 
 interface Props {
-    readonly showHeatmap?: boolean;
+    readonly showHeatmap?: boolean
 }
 
 interface State {
-    readonly heatmapType?: HeatmapType;
+    readonly heatmapType?: HeatmapType
 }
 
 const mapStateToProps = (state: Types.StoreType, props: Props) => ({
-  app: state.application,
-  modelSimInfo: state.modelSimInfo,
-  simulation: state.simulation,
-});
+    app: state.application,
+    modelSimInfo: state.modelSimInfo,
+    simulation: state.simulation
+})
 
 class BPMNViewerPage extends React.PureComponent<BPMNViewerProps & Props, State> {
-
-    private _bpmnContent: string = '';
+    private _bpmnContent: string = ''
 
     constructor(props: BPMNViewerProps & Props) {
-        super(props);
+        super(props)
 
-        this.state = { heatmapType: props.showHeatmap ? 'waiting' : undefined };
+        this.state = { heatmapType: props.showHeatmap ? 'waiting' : undefined }
 
-        const parser = props.app.activeParser;
+        const parser = props.app.activeParser
         if (parser) {
-            this._bpmnContent = parser.getFileContents();
+            this._bpmnContent = parser.getFileContents()
         }
     }
 
     private onHeatmapTypeChanged = (value: HeatmapType) => {
-        this.setState({...this.state, heatmapType: value })
-    }
-
-    private heatmapContainerStyle = {
-        display: 'inline-table'
-    }
-
-    private heatmapSelectorStyle = {
-        display: 'table-cell',
-        verticalAlign: 'middle'
-    }
-
-    private heatmapSelectorTitleStyle = {
-        display: 'table-cell',
-        verticalAlign: 'middle',
-        paddingRight: '30px'
+        this.setState({ ...this.state, heatmapType: value })
     }
 
     render() {
-        const { showHeatmap, ...props} = this.props;
+        const { showHeatmap, ...props } = this.props
         return (
-            <div id='bpmn-viewer-container'>
-                <h2>{showHeatmap ? 'Heatmap' : 'BPMN Viewer'}</h2>
-                {showHeatmap &&
-                    <div style={this.heatmapContainerStyle}>
-                        <h3 style={this.heatmapSelectorTitleStyle}>Heatmap based on:</h3>
-                        <div style={this.heatmapSelectorStyle}>
-                            <TooltipDropdown
-                                source={heatmapTypes}
-                                value={this.state.heatmapType}
-                                onChange={this.onHeatmapTypeChanged}
-                                tooltip='Select based on which results to show the heatmap'
-                            />
+            <div id="bpmn-viewer-container" className="content">
+                <div id="bpmn-viewer-heatmap-header">
+                    <h2>{showHeatmap ? 'Heatmap' : 'BPMN Viewer'}</h2>
+                    {showHeatmap && (
+                        <div className="columns is-vcentered">
+                            <div className="column is-narrow">
+                                <p className="subtitle">Heatmap based on</p>
+                            </div>
+                            <div className="column is-2">
+                                <TooltipDropdown
+                                    fullWidth
+                                    source={heatmapTypes}
+                                    value={this.state.heatmapType}
+                                    onChange={(e) => this.onHeatmapTypeChanged(e.target.value as HeatmapType)}
+                                    tooltip="Select based on which results to show the heatmap"
+                                />
+                            </div>
                         </div>
-                    </div>
-                }
-
+                    )}
+                </div>
                 <BPMNViewer {...props} heatmapType={this.state.heatmapType} />
             </div>
-        );
+        )
     }
 }
 

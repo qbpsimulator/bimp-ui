@@ -11,12 +11,12 @@ import BPMNUpdater from '../model-components/BPMNUpdater'
 import { store } from '../store'
 
 export interface ApplicationPayload {
-    page?: string;
-    parser?: BPMNParser;
-    parsers?: Array<BPMNParser>;
-    validateMe?: ValidateMe;
-    initialFiles?: Array<Types.FileDefinition>;
-    config?: Types.Config;
+    page?: string
+    parser?: BPMNParser
+    parsers?: Array<BPMNParser>
+    validateMe?: ValidateMe
+    initialFiles?: Array<Types.FileDefinition>
+    config?: Types.Config
 }
 
 export interface ItemsLoadedPayload<T> {
@@ -26,29 +26,29 @@ export interface TasksLoadedPayload<T> {
     items: Map<string, T>
 }
 export interface ModelSimInfoLoadedPayload {
-    data: Types.ProcessSimulationInfoType;
+    data: Types.ProcessSimulationInfoType
 }
 
 export interface ModelSimInfoPropertyUpdatePayload {
-    key: string;
-    value: Types.SimInfoValueType;
+    key: string
+    value: Types.SimInfoValueType
 }
 
 export interface ElementSimInfoPropertyUpdatePayload {
-    id: string;
-    key: string;
-    value: Types.SimInfoValueType;
+    id: string
+    key: string
+    value: Types.SimInfoValueType
 }
 
 export interface ElementSimInfoSubPropertyUpdatePayload extends ElementSimInfoPropertyUpdatePayload {
-    id: string;
-    subIndex: number;
-    key: string;
-    value: Types.SimInfoValueType;
+    id: string
+    subIndex: number
+    key: string
+    value: Types.SimInfoValueType
 }
 
 export interface ItemIdPayload {
-    id: string;
+    id: string
 }
 
 export function setNewPage(page: string): Actions.Action<ApplicationPayload> {
@@ -61,24 +61,24 @@ export function setNewPage(page: string): Actions.Action<ApplicationPayload> {
 }
 
 export function setActiveParser(parser: BPMNParser): Actions.Action<ApplicationPayload> {
-    const currentParser = store.getState().application.activeParser;
+    const currentParser = store.getState().application.activeParser
     if (currentParser) {
         // update current parser, store current model data
-        const activeSimInfo = store.getState().modelSimInfo;
-        currentParser.updateQbpSimulationInfo(activeSimInfo);
+        const activeSimInfo = store.getState().modelSimInfo
+        currentParser.updateQbpSimulationInfo(activeSimInfo)
 
         // prepare next parser, update main data from current model sim info
-        const combinedSimInfo = ProcessSimulationInfo.createSimInfoWithDefaultsFromAnother(activeSimInfo, parser.getQbpSimulationInfo());
-        parser.updateQbpSimulationInfo(combinedSimInfo);
+        const combinedSimInfo = ProcessSimulationInfo.createSimInfoWithDefaultsFromAnother(activeSimInfo, parser.getQbpSimulationInfo())
+        parser.updateQbpSimulationInfo(combinedSimInfo)
     }
 
     // set simulate as task for callActivites which reference processes that do not exist
-    parser.getCallActivities().forEach(ca => {
+    parser.getCallActivities().forEach((ca) => {
         if (!store.getState().application.allProcessIds.has(ca.calledElement)) {
-            const element = parser.getQbpSimulationInfo().elements.element.find(e => e.elementId === ca.id);
-            element.simulateAsTask = true;
+            const element = parser.getQbpSimulationInfo().elements.element.find((e) => e.elementId === ca.id)
+            element.simulateAsTask = true
         }
-    });
+    })
 
     return {
         type: Actions.Action_Application_SetActiveParser,
@@ -89,7 +89,7 @@ export function setActiveParser(parser: BPMNParser): Actions.Action<ApplicationP
 }
 
 export function setParsers(parsers: Array<BPMNParser>): Actions.Action<ApplicationPayload> {
-    parsers[0].updateQbpSimulationInfo(ProcessSimulationInfo.createMergedSimInfo(parsers.map(p => p.getQbpSimulationInfo())));
+    parsers[0].updateQbpSimulationInfo(ProcessSimulationInfo.createMergedSimInfo(parsers.map((p) => p.getQbpSimulationInfo())))
 
     return {
         type: Actions.Action_Application_SetAllParsers,
@@ -145,7 +145,11 @@ export function updateModelSimInfo(key: string, value: Types.SimInfoValueType): 
     }
 }
 
-export function updateElementSimInfo(elementId: string, key: string, value: Types.SimInfoValueType): Actions.Action<ElementSimInfoPropertyUpdatePayload> {
+export function updateElementSimInfo(
+    elementId: string,
+    key: string,
+    value: Types.SimInfoValueType
+): Actions.Action<ElementSimInfoPropertyUpdatePayload> {
     return {
         type: Actions.Action_Model_ElementSimInfoPropertyUpdated,
         payload: {
@@ -156,7 +160,11 @@ export function updateElementSimInfo(elementId: string, key: string, value: Type
     }
 }
 
-export function updateSequenceFlowSimInfo(elementId: string, key: string, value: Types.SimInfoValueType): Actions.Action<ElementSimInfoPropertyUpdatePayload> {
+export function updateSequenceFlowSimInfo(
+    elementId: string,
+    key: string,
+    value: Types.SimInfoValueType
+): Actions.Action<ElementSimInfoPropertyUpdatePayload> {
     return {
         type: Actions.Action_Model_SequenceFlowPropertyUpdated,
         payload: {
@@ -183,7 +191,11 @@ export function deleteResource(id: string): Actions.Action<ItemIdPayload> {
     }
 }
 
-export function updateResourceProperty(resourceId: string, key: string, value: Types.SimInfoValueType): Actions.Action<ElementSimInfoPropertyUpdatePayload> {
+export function updateResourceProperty(
+    resourceId: string,
+    key: string,
+    value: Types.SimInfoValueType
+): Actions.Action<ElementSimInfoPropertyUpdatePayload> {
     return {
         type: Actions.Action_Model_ResourcePropertyUpdated,
         payload: {
@@ -210,7 +222,12 @@ export function deleteTimeTable(id: string): Actions.Action<ItemIdPayload> {
     }
 }
 
-export function updateTimeTableProperty(timeTableId: string, ruleIndex: number, key: string, value: Types.SimInfoValueType): Actions.Action<ElementSimInfoSubPropertyUpdatePayload> {
+export function updateTimeTableProperty(
+    timeTableId: string,
+    ruleIndex: number,
+    key: string,
+    value: Types.SimInfoValueType
+): Actions.Action<ElementSimInfoSubPropertyUpdatePayload> {
     return {
         type: Actions.Action_Model_TimeTablePropertyUpdated,
         payload: {
@@ -224,7 +241,7 @@ export function updateTimeTableProperty(timeTableId: string, ruleIndex: number, 
 
 export function loadSimulationResults(loadedResults: qbpapi.ResultsType) {
     return {
-        type: "SIMULATION_RESULTS_LOADED",
+        type: 'SIMULATION_RESULTS_LOADED',
         payload: loadedResults
     }
 }
@@ -240,28 +257,26 @@ export function init(config: Types.Config, initialFiles: Array<Types.FileDefinit
 }
 
 export function startSimulation(mxmlLog: boolean) {
-    const state = store.getState();
-    if (state.application.page !== 'scenario')
-        store.dispatch(setNewPage('scenario'));
+    const state = store.getState()
+    if (state.application.page !== 'scenario') store.dispatch(setNewPage('scenario'))
 
-    const validator = state.application.validator;
-    const isValid = !validator || validator.validateAll();
+    const validator = state.application.validator
+    const isValid = !validator || validator.validateAll()
 
     if (isValid) {
-        state.application.activeParser.updateQbpSimulationInfo(state.modelSimInfo);
+        state.application.activeParser.updateQbpSimulationInfo(state.modelSimInfo)
 
-        const bpmnDocs = [];
-        const parsers = state.application.parsers;
-        parsers.forEach(parser => {
-            const updater = new BPMNUpdater(parser);
-            bpmnDocs.push(updater.getUpdatedDocumentAsString(parser.getQbpSimulationInfo(), null));
-        });
+        const bpmnDocs = []
+        const parsers = state.application.parsers
+        parsers.forEach((parser) => {
+            const updater = new BPMNUpdater(parser)
+            bpmnDocs.push(updater.getUpdatedDocumentAsString(parser.getQbpSimulationInfo(), null))
+        })
 
         var rq = new RequestHandler()
-        rq.startSimulation(bpmnDocs, mxmlLog);
-    }
-    else {
-        throw new Error("There is a problem with simulation scenario");
+        rq.startSimulation(bpmnDocs, mxmlLog)
+    } else {
+        throw new Error('There is a problem with simulation scenario')
     }
 
     return {

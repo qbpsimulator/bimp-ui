@@ -1,14 +1,14 @@
 export interface Config {
-    protocol: string;
-    host: string;
+    protocol: string
+    host: string
     url: string
     basicAuth?: {
-        username: string;
-        password: string;
-    };
-    jwtAuth?: {
-        token?: string;
+        username: string
+        password: string
     }
-    linkPrefix: string;
-    errorStackApiKey: string;
+    jwtAuth?: {
+        token?: string
+    }
+    linkPrefix: string
+    errorStackApiKey: string
 }
