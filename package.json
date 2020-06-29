@@ -1,6 +1,6 @@
 {
     "name": "bimp-ui",
-    "version": "4.0.1",
+    "version": "4.0.2",
     "description": "UI for QBP Business Process Simulator",
     "main": "index.ts",
     "scripts": {
