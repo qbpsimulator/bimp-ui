@@ -264,11 +264,6 @@ export default class BPMNParser {
         list.forEach((element: Element) => {
             if (!BPMNParser.isDefaultBPMNElement(element)) return
 
-            // allow only intermediate catch events and boundary timer events
-            if (element.localName == 'boundaryEvent' && !element.querySelector('timerEventDefinition')) {
-                return
-            }
-
             this._catchEvents.push({
                 id: element.getAttribute('id'),
                 name: BPMNParser.getElementFriendlyName(element),
