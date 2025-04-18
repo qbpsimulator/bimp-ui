@@ -1,6 +1,6 @@
 import * as Types from '../types'
 import BPMNParser from './BPMNParser'
-import { Utils } from './Utils'
+import { Utils } from './Utils'                                                                                                       
 import { Helpers } from './Helpers'
 
 export class ProcessSimulationInfo {

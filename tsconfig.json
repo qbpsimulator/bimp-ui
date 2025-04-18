@@ -1,11 +1,13 @@
 {
     "compilerOptions": {
+        "esModuleInterop": true,
         "outDir": "./npm",
         "sourceMap": true,
         "noImplicitAny": false, // todo check
         "module": "commonjs",
         "target": "es5",
         "jsx": "react",
+        "jsxFactory": "React.createElement",
         "lib": ["es6", "dom", "scripthost"],
         "allowJs": true, // todo check
         "experimentalDecorators": true

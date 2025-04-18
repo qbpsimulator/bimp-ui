@@ -47,9 +47,7 @@ export default class SimulationResultsPage extends React.Component<Props, State>
         })
 
         return (
-            <div className="container">
-                <p className="title">Simulation Results</p>
-                <div className="box">
+            <div className="container">                <div className="box">
                     <div className="content">
                         <p className="subtitle">General information</p>
                         <table>

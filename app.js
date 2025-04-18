@@ -1,13 +1,15 @@
-const { Bimp } = require('./src/Bimp')
+import * as Bimp from 'bimp-ui';
+import 'bimp-ui/bimp-ui.sass';
+
 
 var bimpConfig = {
     // Protocol for Simulation Service
     protocol: 'https://',
     // Hostname and port where RESTful Simulation Service is hosted
     // host: "qbp-simulator.com:8080", // or: window.location.hostname + ":8080"
-    host: 'api.qbp-simulator.com', // or: window.location.hostname + ":8080"
+    host: 'www.qbp-simulator.com:8080', // or: window.location.hostname + ":8080"
     // Path to the Simulation endpoint in the service
-    url: '/rest/v1/Simulation',
+    url: '/qbp-simulator/rest/Simulation',
     // Relative path prefix to BPMN and Heatmap viewer files (bpmnViewer.html and heatmapViewer.html) to be opened when requested.
     linkPrefix: '',
     // API key for errorstack.com error reporting
